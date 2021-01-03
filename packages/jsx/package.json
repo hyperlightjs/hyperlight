@@ -1,0 +1,24 @@
+{
+  "name": "@hyperlight/jsx",
+  "version": "0.0.0",
+  "description": "Jsx factory for hyperlight",
+  "type": "module",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "hyperapp": "^2.0.8"
+  },
+  "devDependencies": {
+    "rollup": "^2.35.1",
+    "rollup-plugin-typescript2": "^0.29.0",
+    "tslib": "^2.0.3"
+  }
+}

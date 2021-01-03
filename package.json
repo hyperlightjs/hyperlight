@@ -1,0 +1,7 @@
+{
+  "name": "hyperlight",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build -r"
+  }
+}

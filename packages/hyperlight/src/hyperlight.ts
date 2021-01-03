@@ -1,0 +1,3 @@
+import { Hyperlight } from ".";
+
+Hyperlight();

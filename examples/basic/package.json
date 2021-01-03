@@ -1,0 +1,20 @@
+{
+  "name": "basic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "hyperlight"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hyperlight/jsx": "link:../../packages/jsx",
+    "hyperapp": "^2.0.8",
+    "hyperlight": "link:../../packages/hyperlight"
+  },
+  "devDependencies": {
+    "@tinyhttp/app": "^1.1.5"
+  }
+}
