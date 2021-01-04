@@ -1,6 +1,6 @@
 import { App, Request, Response } from "@tinyhttp/app";
 type HtmlTemplate = (js: string, preRender: string, stylesheet: string) => string;
-type JsTemplate = (state: any, scriptPath: string) => string;
+type JsTemplate = (state: any, view: any) => string;
 interface HyperlightConfiguration {
     host: string;
     port: string | number;

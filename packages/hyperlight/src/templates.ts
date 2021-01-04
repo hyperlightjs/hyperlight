@@ -3,15 +3,15 @@ export type HtmlTemplate = (
   preRender: string,
   stylesheet: string
 ) => string;
-export type JsTemplate = (state: any, scriptPath: string) => string;
+export type JsTemplate = (state: any, view: any) => string;
 
-export const prodJsTemplate: JsTemplate = (state: any, scriptPath: string) => `
-import { h, text, app } from './hyperapp.js'
-import pageScript from '/scripts/${scriptPath}.mjs'
+export const prodJsTemplate: JsTemplate = (state: any, pagePath: string) => `
+import { app } from './hyperapp.js'
+import view from '${pagePath}'
 
 app({
   init: ${JSON.stringify(state)},
-  view: pageScript,
+  view,
   node: document.getElementById('app')
 })
 `;

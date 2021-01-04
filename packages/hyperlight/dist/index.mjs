@@ -4,6 +4,7 @@ import { App } from '@tinyhttp/app';
 import esbuild from 'esbuild';
 import { renderToString } from 'hyperapp-render';
 import fs from 'fs';
+import { rm } from 'fs/promises';
 import sirv from 'sirv';
 
 async function bundlePage(page) {
@@ -12,9 +13,10 @@ async function bundlePage(page) {
     build = await esbuild.build({
       entryPoints: [`pages/${page.script}`],
       bundle: true,
-      external: ["hyperapp", "@tinyhttp/app"],
+      external: ["@tinyhttp/app"],
       platform: "node",
       jsxFactory: "jsx",
+      jsxFragment: "Fragment",
       format: "esm",
       outdir: `.cache/bundled`,
       outbase: "pages",
@@ -23,25 +25,24 @@ async function bundlePage(page) {
       },
       splitting: true,
       define: {
-        NODE_END: "development"
+        NODE_ENV: "development"
       }
     });
   } catch (e) {
-    console.error("Failed to compile");
-    console.error(e.message);
+    console.error("[ERROR] Failed to compile: " + e.message);
     return;
   }
   for (const warning of build.warnings)
     console.warn(warning);
 }
 
-const prodJsTemplate = (state, scriptPath) => `
-import { h, text, app } from './hyperapp.js'
-import pageScript from '/scripts/${scriptPath}.mjs'
+const prodJsTemplate = (state, pagePath) => `
+import { app } from './hyperapp.js'
+import view from '${pagePath}'
 
 app({
   init: ${JSON.stringify(state)},
-  view: pageScript,
+  view,
   node: document.getElementById('app')
 })
 `;
@@ -75,8 +76,8 @@ class HyperlightServer {
   devServer() {
   }
   async prodServer() {
-    const pagesDir = readdir(join(process.cwd(), "pages/"), (filePath) => path.parse(filePath).ext === ".tsx");
-    fs.existsSync(this.cacheDir) ? fs.rmSync(this.cacheDir, {recursive: true, force: true}) : "";
+    const pagesDir = readdir(join(process.cwd(), "pages/"), (filePath) => path.parse(filePath).ext == ".ts" || path.parse(filePath).ext == ".tsx");
+    fs.existsSync(this.cacheDir) ? await rm(this.cacheDir, {recursive: true, force: true}) : "";
     for (const script of pagesDir) {
       const parsedScriptPath = path.parse(script);
       const route = join(parsedScriptPath.dir, parsedScriptPath.name);
@@ -107,13 +108,14 @@ class HyperlightServer {
   }
   async staticallyCache(page, htmlTemplate2, jsTemplate) {
     const view = page.pageImport.default;
-    const preRender = renderToString(view(page.pageImport.getInitialState));
-    const htmlContent = htmlTemplate2(jsTemplate(page.pageImport.getInitialState() ?? {}, page.routes.script), preRender, page.routes.stylesheet);
+    const state = page.pageImport.getInitialState?.() ?? {};
+    const preRender = renderToString(view(state));
+    const htmlContent = htmlTemplate2(jsTemplate(state, page.routes.script), preRender, page.routes.stylesheet);
     fs.writeFileSync(page.outputPaths.html, htmlContent);
   }
   ssrMw(page, htmlTemplate2, jsTemplate) {
     return async (req, res) => {
-      const initialState = page.pageImport.getInitialState() ?? {};
+      const initialState = page.pageImport.getInitialState?.() ?? {};
       const serverSideState = page.pageImport.getServerSideState(req);
       const view = page.pageImport.default;
       const state = {...initialState, ...serverSideState};

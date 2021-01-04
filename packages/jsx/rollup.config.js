@@ -1,8 +1,8 @@
-const pt2 = require("rollup-plugin-typescript2");
+import esbuild from "rollup-plugin-esbuild";
 
 export default {
   input: "src/index.ts",
-  plugins: [pt2()],
+  plugins: [esbuild({ target: "esnext" })],
   output: {
     dir: "dist",
     format: "esm",

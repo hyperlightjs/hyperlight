@@ -1,7 +1,32 @@
 {
   "name": "hyperlight",
-  "type": "module",
   "scripts": {
-    "build": "pnpm build -r"
+    "prerelease": "pnpm lint && pnpm build && pnpm test",
+    "chgset:run": "changeset",
+    "chgset:version": "changeset version",
+    "chgset": "pnpm chgset:run && pnpm chgset:version",
+    "release": "changeset publish",
+    "test": "jest --detectOpenHandles",
+    "lint": "eslint . --ext=js,mjs,ts,cjs",
+    "format": "prettier --check \"./**/*.{ts,js,mjs,cjs}\"",
+    "echo:ancestor": "echo ${ANCESTOR_REF:-$(git merge-base origin/master HEAD)}",
+    "build": "pnpm -r build",
+    "build:ancestor": "pnpm --filter ...[$(pnpm --silent echo:ancestor)] build"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.1",
+    "@typescript-eslint/parser": "^4.11.1",
+    "eslint": "^7.17.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.0",
+    "husky": "^4.3.6",
+    "prettier": "^2.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }

@@ -12,26 +12,16 @@ var h = (e2, r, t2) => v(e2, r, l(t2) ? t2 : t2 == null ? n : [t2], null, r.key)
 var jsxify = (h2) => (type, props, ...children) => typeof type === "function" ? type(props, children) : h2(type, props || {}, [].concat(...children).map((any) => typeof any === "string" || typeof any === "number" ? text(any) : any));
 var jsx = jsxify(h);
 
-// pages/test.tsx
-var test_default = (state) => /* @__PURE__ */ jsx("section", null, /* @__PURE__ */ jsx("h1", null, "aaaasssssssss"), /* @__PURE__ */ jsx("p", null, "bbbb"), /* @__PURE__ */ jsx("p", null, state.text), /* @__PURE__ */ jsx("p", null, state.test), /* @__PURE__ */ jsx("p", null, "Server side prop ", "=>", " ", state.headers), /* @__PURE__ */ jsx("input", {
-  value: state.text,
-  oninput: (state2, event) => {
-    return {...state2, text: event.target.value};
-  }
-}));
-var getServerSideState = (req) => {
-  return {
-    test: "I <3 server side state",
-    headers: req.headers["user-agent"]
-  };
+// pages/:parameter.tsx
+var parameter_default = (state) => {
+  return /* @__PURE__ */ jsx("p", null, state.parameter);
 };
-var getInitialState = () => {
+function getServerSideState(req) {
   return {
-    text: "hello world"
+    parameter: req.params.parameter
   };
-};
+}
 export {
-  test_default as default,
-  getInitialState,
+  parameter_default as default,
   getServerSideState
 };

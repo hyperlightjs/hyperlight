@@ -3,6 +3,11 @@ import { Request } from "@tinyhttp/app";
 
 import "./module.css";
 
+function CustomComponent(props: any) {
+  //console.log(document.getElementsByName("head"));
+  return;
+}
+
 export default (state: any) => {
   return (
     <section>
@@ -10,6 +15,7 @@ export default (state: any) => {
       <p>bbbb</p>
       <p>{state.text}</p>
       <p>{state.test}</p>
+      <CustomComponent>component</CustomComponent>
       <p>
         Server side prop {"=>"} {state.headers}
       </p>

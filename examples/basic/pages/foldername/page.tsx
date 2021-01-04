@@ -3,7 +3,7 @@ import { Request } from "@tinyhttp/app";
 
 export default (state: any) => (
   <section>
-    <h1>aaaasssssssss</h1>
+    <h1>i really like tests</h1>
     <p>bbbb</p>
     <p>{state.text}</p>
     <p>{state.test}</p>

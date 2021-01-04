@@ -14,11 +14,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "hyperapp": "^2.0.8"
+    "hyperapp": "^2.0.8",
+    "rollup-plugin-esbuild": "^2.6.1"
   },
   "devDependencies": {
     "rollup": "^2.35.1",
-    "rollup-plugin-typescript2": "^0.29.0",
     "tslib": "^2.0.3"
   }
 }

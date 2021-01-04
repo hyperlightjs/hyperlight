@@ -1,28 +1,25 @@
-// ../../packages/jsx/dist/index.js
+// ../../node_modules/.pnpm/hyperapp@2.0.8/node_modules/hyperapp/hyperapp.js
 var e = {};
 var n = [];
+var t = n.map;
 var l = Array.isArray;
-var v = (e2, n2, r, t, l2, o) => ({type: e2, props: n2, children: r, node: t, key: l2, tag: o});
-var text = (r, t) => v(r, e, n, t, null, 3);
-var h = (e2, r, t) => v(e2, r, l(t) ? t : t == null ? n : [t], null, r.key);
-var jsxify = function(h2) {
-  return function(type, props) {
-    var children = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-      children[_i - 2] = arguments[_i];
-    }
-    return typeof type === "function" ? type(props, children) : h2(type, props || {}, [].concat.apply([], children).map(function(any) {
-      return typeof any === "string" || typeof any === "number" ? text(any) : any;
-    }));
-  };
-};
+var o = typeof requestAnimationFrame != "undefined" ? requestAnimationFrame : setTimeout;
+var v = (e2, n2, r, t2, l2, o2) => ({type: e2, props: n2, children: r, node: t2, key: l2, tag: o2});
+var text = (r, t2) => v(r, e, n, t2, null, 3);
+var h = (e2, r, t2) => v(e2, r, l(t2) ? t2 : t2 == null ? n : [t2], null, r.key);
+
+// ../../packages/jsx/dist/index.js
+var jsxify = (h2) => (type, props, ...children) => typeof type === "function" ? type(props, children) : h2(type, props || {}, [].concat(...children).map((any) => typeof any === "string" || typeof any === "number" ? text(any) : any));
 var jsx = jsxify(h);
 
 // pages/index.tsx
+function CustomComponent(props) {
+  return;
+}
 var pages_default = (state) => {
   return /* @__PURE__ */ jsx("section", null, /* @__PURE__ */ jsx("p", {
     className: "text"
-  }, "aaaa"), /* @__PURE__ */ jsx("p", null, "bbbb"), /* @__PURE__ */ jsx("p", null, state.text), /* @__PURE__ */ jsx("p", null, state.test), /* @__PURE__ */ jsx("p", null, "Server side prop ", "=>", " ", state.headers), /* @__PURE__ */ jsx("input", {
+  }, "aaaa"), /* @__PURE__ */ jsx("p", null, "bbbb"), /* @__PURE__ */ jsx("p", null, state.text), /* @__PURE__ */ jsx("p", null, state.test), /* @__PURE__ */ jsx(CustomComponent, null, "component"), /* @__PURE__ */ jsx("p", null, "Server side prop ", "=>", " ", state.headers), /* @__PURE__ */ jsx("input", {
     value: state.text,
     oninput: (state2, event) => {
       return {...state2, text: event.target.value};
