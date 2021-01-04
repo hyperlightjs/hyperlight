@@ -4,7 +4,7 @@ import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm } from 'fs/promises'
+import { rm as fsRm, writeFile, mkdir } from 'fs/promises'
 import {
   HtmlTemplate,
   htmlTemplate,
@@ -13,6 +13,7 @@ import {
 } from './templates'
 import sirv from 'sirv'
 import readdir from 'readdirp'
+import * as utils from './utils'
 
 export interface HyperlightConfiguration {
   host: string
@@ -55,20 +56,12 @@ export class HyperlightServer {
     this.config.dev ? this.devServer() : this.prodServer()
   }
 
-  async scanPages() {
-    const dirScan = await readdir.promise('pages/', {
-      fileFilter: ['*.ts', '*.tsx']
-    })
-
-    return dirScan.map((v) => v.path)
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   devServer() {}
 
   async prodServer() {
     // Get all the files in the pages directory
-    const pagesDir = await this.scanPages()
+    const pagesDir = await utils.scanPages()
 
     // Clear cache
     fs.existsSync(this.cacheDir)
@@ -85,7 +78,7 @@ export class HyperlightServer {
       const parsedScriptPath = path.parse(script)
 
       const route = pathJoin(parsedScriptPath.dir, parsedScriptPath.name)
-      const normalizedRoute = this.normalizeRoute(route)
+      const normalizedRoute = utils.normalizeRoute(route)
 
       const hyperlightPage: HyperlightPage = {
         script,
@@ -122,7 +115,7 @@ export class HyperlightServer {
       }
     }
 
-    this.app.use(sirv(this.cacheDir))
+    this.app.use('/bundled/', sirv(this.cacheDir))
 
     this.app.listen(
       this.config.port,
@@ -140,9 +133,7 @@ export class HyperlightServer {
     jsTemplate: JsTemplate
   ) {
     const view = page.pageImport.default
-
     const state = page.pageImport.getInitialState?.() ?? {}
-
     const preRender = renderToString(view(state))
 
     const htmlContent = htmlTemplate(
@@ -151,7 +142,12 @@ export class HyperlightServer {
       page.routes.stylesheet
     )
 
-    fs.writeFileSync(page.outputPaths.html, htmlContent)
+    await utils.writeFileRecursive(htmlContent, page.outputPaths.html)
+
+    console.log(page.outputPaths.html)
+    this.app.get(page.routes.base, (_, res) =>
+      res.sendFile(page.outputPaths.html)
+    )
   }
 
   ssrMw(
@@ -174,13 +170,6 @@ export class HyperlightServer {
 
       res.send(htmlContent)
     }
-  }
-
-  normalizeRoute(route: string) {
-    const lastIndex = route.lastIndexOf('index')
-
-    if (lastIndex >= 0) return route.slice(0, lastIndex)
-    else return route
   }
 }
 
