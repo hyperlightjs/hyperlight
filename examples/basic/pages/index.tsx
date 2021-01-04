@@ -1,11 +1,11 @@
-import { jsx } from "@hyperlight/jsx";
-import { Request } from "@tinyhttp/app";
+import { jsx } from '@hyperlight/jsx'
+import { Request } from '@tinyhttp/app'
 
-import "./module.css";
+import './module.css'
 
 function CustomComponent(props: any) {
   //console.log(document.getElementsByName("head"));
-  return;
+  return
 }
 
 export default (state: any) => {
@@ -17,25 +17,25 @@ export default (state: any) => {
       <p>{state.test}</p>
       <CustomComponent>component</CustomComponent>
       <p>
-        Server side prop {"=>"} {state.headers}
+        Server side prop {'=>'} {state.headers}
       </p>
 
       <input
         value={state.text}
         oninput={(state, event: { target: HTMLInputElement }) => {
-          return { ...state, text: event.target.value };
+          return { ...state, text: event.target.value }
         }}
       />
     </section>
-  );
-};
+  )
+}
 
 export const getServerSideState = (req: Request) => {
-  return { test: "I <3 server side state", headers: req.headers["user-agent"] };
-};
+  return { test: 'I <3 server side state', headers: req.headers['user-agent'] }
+}
 
 export const getInitialState = () => {
   return {
-    text: "hello world",
-  };
-};
+    text: 'hello world'
+  }
+}

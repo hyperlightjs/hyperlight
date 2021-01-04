@@ -16,7 +16,7 @@ import readdir from 'readdirp'
 
 export interface HyperlightConfiguration {
   host: string
-  port: string | number
+  port: number
   dev: undefined | true
 }
 
@@ -44,7 +44,7 @@ export class HyperlightServer {
   constructor(config?: Partial<HyperlightConfiguration>) {
     this.config = config ?? {}
     this.config.host ??= '127.0.0.1'
-    this.config.port ??= '8080'
+    this.config.port ??= 8080
 
     this.app = new App()
 
@@ -59,6 +59,7 @@ export class HyperlightServer {
     const dirScan = await readdir.promise('pages/', {
       fileFilter: ['*.ts', '*.tsx']
     })
+
     return dirScan.map((v) => v.path)
   }
 
@@ -73,6 +74,10 @@ export class HyperlightServer {
     fs.existsSync(this.cacheDir)
       ? await fsRm(this.cacheDir, { recursive: true, force: true })
       : ''
+
+    console.log(`○ - Statically generated`)
+    console.log('λ - Server-side rendered')
+    console.log('\n')
 
     // Bundle all scripts and put them in the cache folder
     // NOTE: this is where the difference between statically generated and server side rendered is made
@@ -104,19 +109,29 @@ export class HyperlightServer {
         hyperlightPage.outputPaths.script
       )
 
-      if (hyperlightPage.pageImport.getServerSideState)
+      if (hyperlightPage.pageImport.getServerSideState) {
+        // Differenciate between server side rendered page and statically generated ones
+        console.log(`λ ${hyperlightPage.script}`)
         this.app.get(
           hyperlightPage.routes.base,
           this.ssrMw(hyperlightPage, htmlTemplate, prodJsTemplate)
         )
-      // If the page needs to be server side rendered skip the rest of the loop
-      else
-        await this.staticallyCache(hyperlightPage, htmlTemplate, prodJsTemplate)
+      } else {
+        console.log(`○ ${hyperlightPage.script}`)
+        this.staticallyCache(hyperlightPage, htmlTemplate, prodJsTemplate)
+      }
     }
 
     this.app.use(sirv(this.cacheDir))
 
-    this.app.listen(8080)
+    this.app.listen(
+      this.config.port,
+      () =>
+        console.log(
+          `\nServer is now listening on port: ${this.config.host}:${this.config.port}`
+        ),
+      this.config.host
+    )
   }
 
   async staticallyCache(
