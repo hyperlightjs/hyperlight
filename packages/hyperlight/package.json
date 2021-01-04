@@ -23,7 +23,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/fs-readdir-recursive": "^1.0.0",
     "@types/node": "^14.14.19",
     "rollup": "^2.35.1",
     "rollup-plugin-esbuild": "^2.6.1",
@@ -37,9 +36,9 @@
   "dependencies": {
     "@tinyhttp/app": "^1.1.5",
     "esbuild": "^0.8.29",
-    "fs-readdir-recursive": "^1.1.0",
     "hyperapp": "^2.0.8",
     "hyperapp-render": "^3.5.0",
+    "readdirp": "^3.5.0",
     "rollup-plugin-bin": "^1.0.0",
     "sirv": "^1.0.10"
   }

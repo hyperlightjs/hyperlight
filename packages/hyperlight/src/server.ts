@@ -1,4 +1,3 @@
-import readdir from 'fs-readdir-recursive'
 import { join as pathJoin } from 'path'
 import { App, Request, Response } from '@tinyhttp/app'
 import { bundlePage } from './bundler'
@@ -13,6 +12,7 @@ import {
   prodJsTemplate
 } from './templates'
 import sirv from 'sirv'
+import readdir from 'readdirp'
 
 export interface HyperlightConfiguration {
   host: string
@@ -55,16 +55,19 @@ export class HyperlightServer {
     this.config.dev ? this.devServer() : this.prodServer()
   }
 
+  async scanPages() {
+    const dirScan = await readdir.promise('pages/', {
+      fileFilter: ['*.ts', '*.tsx']
+    })
+    return dirScan.map((v) => v.path)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   devServer() {}
 
   async prodServer() {
     // Get all the files in the pages directory
-    const pagesDir = readdir(
-      pathJoin(process.cwd(), 'pages/'),
-      (filePath) =>
-        path.parse(filePath).ext == '.ts' || path.parse(filePath).ext == '.tsx'
-    )
+    const pagesDir = await this.scanPages()
 
     // Clear cache
     fs.existsSync(this.cacheDir)
