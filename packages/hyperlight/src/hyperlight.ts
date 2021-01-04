@@ -1,3 +1,3 @@
-import { Hyperlight } from ".";
+import { Hyperlight } from '.'
 
-Hyperlight();
+Hyperlight()

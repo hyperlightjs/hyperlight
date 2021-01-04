@@ -1,8 +1,8 @@
 // @ts-ignore
-import { h, text } from "hyperapp";
+import { h, text } from 'hyperapp'
 
 const jsxify = (h: any) => (type: any, props: any, ...children: any[]) =>
-  typeof type === "function"
+  typeof type === 'function'
     ? type(props, children)
     : h(
         type,
@@ -10,7 +10,7 @@ const jsxify = (h: any) => (type: any, props: any, ...children: any[]) =>
         []
           .concat(...children)
           .map((any) =>
-            typeof any === "string" || typeof any === "number" ? text(any) : any
+            typeof any === 'string' || typeof any === 'number' ? text(any) : any
           )
-      );
-export const jsx = jsxify(h); /** @jsx jsx */
+      )
+export const jsx = jsxify(h) /** @jsx jsx */

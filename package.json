@@ -8,7 +8,8 @@
     "release": "changeset publish",
     "test": "jest --detectOpenHandles",
     "lint": "eslint . --ext=js,mjs,ts,cjs",
-    "format": "prettier --check \"./**/*.{ts,js,mjs,cjs}\"",
+    "format": "prettier --check \"./**/*.{ts,js,mjs,cjs,json}\"",
+    "format:write": "prettier --check \"./**/*.{ts,js,mjs,cjs,json}\" -w",
     "echo:ancestor": "echo ${ANCESTOR_REF:-$(git merge-base origin/master HEAD)}",
     "build": "pnpm -r build",
     "build:ancestor": "pnpm --filter ...[$(pnpm --silent echo:ancestor)] build"
@@ -26,6 +27,7 @@
   },
   "husky": {
     "hooks": {
+      "pre-commit": "pnpm format && pnpm lint",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   }

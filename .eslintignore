@@ -4,4 +4,5 @@ dist
 coverage
 ./**/dist
 ./**/node_modules/
+./**/.cache
 benchmark

@@ -2,8 +2,8 @@ export type HtmlTemplate = (
   js: string,
   preRender: string,
   stylesheet: string
-) => string;
-export type JsTemplate = (state: any, view: any) => string;
+) => string
+export type JsTemplate = (state: any, view: any) => string
 
 export const prodJsTemplate: JsTemplate = (state: any, pagePath: string) => `
 import { app } from './hyperapp.js'
@@ -14,7 +14,7 @@ app({
   view,
   node: document.getElementById('app')
 })
-`;
+`
 
 export const htmlTemplate: HtmlTemplate = (
   js: string,
@@ -33,4 +33,4 @@ export const htmlTemplate: HtmlTemplate = (
     </script>
   </body>
 </html>
-`;
+`

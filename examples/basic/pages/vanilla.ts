@@ -1,3 +1,3 @@
-import { h, text, app } from "hyperapp";
+import { h, text, app } from 'hyperapp'
 
-export default (state: any) => h("h1", {}, text("Hyperscript"));
+export default (state: any) => h('h1', {}, text('Hyperscript'))
