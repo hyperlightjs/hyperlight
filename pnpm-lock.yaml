@@ -20,18 +20,6 @@ importers:
       eslint-plugin-prettier: ^3.3.0
       husky: ^4.3.6
       prettier: ^2.2.1
-  examples/basic:
-    dependencies:
-      '@hyperlight/jsx': 'link:../../packages/jsx'
-      hyperapp: 2.0.8
-      hyperlight: 'link:../../packages/hyperlight'
-    devDependencies:
-      '@tinyhttp/app': 1.1.5
-    specifiers:
-      '@hyperlight/jsx': 'link:../../packages/jsx'
-      '@tinyhttp/app': ^1.1.5
-      hyperapp: ^2.0.8
-      hyperlight: 'link:../../packages/hyperlight'
   packages/hyperlight:
     dependencies:
       '@tinyhttp/app': 1.1.5
@@ -1222,6 +1210,7 @@ packages:
     dependencies:
       es-mime-types: 0.0.16
       negotiator: 0.6.2
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1234,36 +1223,43 @@ packages:
       '@tinyhttp/res': 1.1.1
       '@tinyhttp/router': 1.1.0
       regexparam: 1.3.0
+    dev: false
     engines:
       node: '>=12.x'
     resolution:
       integrity: sha512-X4xtuy2uaXYStAq83rHpVu7rV0Z2S/6i2FQjVYOP+nMK8e3fpdjyiTuBI20R8Cf8tu9j1/xbpBP8z1imhOcnrg==
   /@tinyhttp/content-disposition/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-PtYhgFGf+eh+Rep/q4+HJSMRtxqI5mmuEBaHIIEh/YDUpewyIAvGlCqrKcAKfYzYaaOu/vK0OEK2aRsuB7IwKQ==
   /@tinyhttp/cookie-signature/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-XQq88kCsaT/Qq4TVhYXjz98K5nLaNL5PiI9g95dHAQRVU6Co43IQdu0TXvzE8F3iybM2OiFW4/kafvbcnTPPdw==
   /@tinyhttp/cookie/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-o46r51JZxUlHK3v73EiOaZAxkJgEyrBycpK/EtuKzRTmZXmIrijWsncWv/0F6Ihg9qtwxLTEi3AyZDUU9V5r3A==
   /@tinyhttp/encode-url/0.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-TiP2T33myt8JwOqtM0hnq8XX+CrJwWz+6fzf9CislVwVbf06c8NDnh29V4Qv71UKyjh9e3NrMkWHY/nYvKKqWQ==
   /@tinyhttp/etag/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-QvaXas54VP9nQdhF6Iz2KJQ2MG2eOsHEI70Or9x3l3jpggqywHrncs4lW1XcfLuk658/9UNAmnz2EWODOMxfcA==
   /@tinyhttp/forwarded/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1272,6 +1268,7 @@ packages:
     dependencies:
       '@tinyhttp/forwarded': 1.1.0
       ipaddr.js: 2.0.0
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1283,6 +1280,7 @@ packages:
       '@tinyhttp/url': 1.1.1
       es-fresh: 0.0.8
       range-parser: 1.2.1
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1298,11 +1296,13 @@ packages:
       es-mime-types: 0.0.16
       es-vary: 0.0.8
       escape-html: 1.0.3
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
       integrity: sha512-X4cqpsQaDqMdoAYjqB6JxInr4jj+rjR66Hedg3LmPHnMR0y49oo4c5MWD2HEcc8YskiqNUB7bUSdj2Y+/DilYQ==
   /@tinyhttp/router/1.1.0:
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1312,6 +1312,7 @@ packages:
       '@tinyhttp/etag': 1.1.0
       es-content-type: 0.0.10
       es-mime-types: 0.0.16
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1320,6 +1321,7 @@ packages:
     dependencies:
       es-content-type: 0.0.10
       es-mime-types: 0.0.16
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1327,6 +1329,7 @@ packages:
   /@tinyhttp/url/1.1.1:
     dependencies:
       regexparam: 1.3.0
+    dev: false
     engines:
       node: '>=12.4.0'
     resolution:
@@ -1957,11 +1960,13 @@ packages:
     resolution:
       integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==
   /es-content-type/0.0.10:
+    dev: false
     engines:
       node: '>=12.x'
     resolution:
       integrity: sha512-yCgcv1M2IuFUoGZ3zE4OR2INGmZOwEuyaE5WX4MOKGpJcO8JXgVOIcXVicwnTqlxvx6qs9IJGl/Rr1+YtCkRgg==
   /es-fresh/0.0.8:
+    dev: false
     engines:
       node: '>=12.x'
     resolution:
@@ -1969,11 +1974,13 @@ packages:
   /es-mime-types/0.0.16:
     dependencies:
       mime-db: 1.45.0
+    dev: false
     engines:
       node: '>=12.x'
     resolution:
       integrity: sha512-84QoSLeA7cdTeHpALFNl3ZOstXfvLt426/kaOgmSxmNUOhi4GesKVkhJgIfnsqGNziYezVA8rvZUsXj7oWX2qQ==
   /es-vary/0.0.8:
+    dev: false
     engines:
       node: '>=12.x'
     resolution:
@@ -1991,6 +1998,7 @@ packages:
     resolution:
       integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==
   /escape-html/1.0.3:
+    dev: false
     resolution:
       integrity: sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
   /escape-string-regexp/1.0.5:
@@ -2504,6 +2512,7 @@ packages:
     resolution:
       integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==
   /ipaddr.js/2.0.0:
+    dev: false
     engines:
       node: '>= 10'
     resolution:
@@ -2756,6 +2765,7 @@ packages:
     resolution:
       integrity: sha512-y7FpHSbMUMoyPbYUSzO6PaZ6FyRnQOpHuKwbo1G+Knck95XVU4QAiKdGEnj5wwoS7PlOgthX/09u5iFJ+aYf5Q==
   /mime-db/1.45.0:
+    dev: false
     engines:
       node: '>= 0.6'
     resolution:
@@ -2802,6 +2812,7 @@ packages:
     resolution:
       integrity: sha1-Sr6/7tdUHywnrPspvbvRXI1bpPc=
   /negotiator/0.6.2:
+    dev: false
     engines:
       node: '>= 0.6'
     resolution:
@@ -3032,6 +3043,7 @@ packages:
     resolution:
       integrity: sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==
   /range-parser/1.2.1:
+    dev: false
     engines:
       node: '>= 0.6'
     resolution:
@@ -3111,6 +3123,7 @@ packages:
     resolution:
       integrity: sha512-eOf6vka5IO151Jfsw2NO9WpGX58W6wWmefK3I1zEGr0lOD0u8rwPaNqQL1aRxUaxLeKO3ArNh3VYg1KbaD+FFw==
   /regexparam/1.3.0:
+    dev: false
     engines:
       node: '>=6'
     resolution:

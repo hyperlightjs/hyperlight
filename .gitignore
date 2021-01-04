@@ -1,2 +1,10 @@
 node_modules
-.env
+dist
+**/dist
+log.txt
+coverage
+examples/*/.env
+pnpm-lock.yaml
+.next
+.cache
+.clinic
