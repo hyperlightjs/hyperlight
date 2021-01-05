@@ -1,27 +1,23 @@
-import { join as pathJoin } from 'path'
 import { App, Request, Response } from '@tinyhttp/app'
 import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm, writeFile, mkdir } from 'fs/promises'
-import {
-  HtmlTemplate,
-  htmlTemplate,
-  JsTemplate,
-  prodJsTemplate
-} from './templates'
+import { rm as fsRm, mkdir } from 'fs/promises'
+import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
-import readdir from 'readdirp'
+import chokidar from 'chokidar'
 import * as utils from './utils'
+import serveHandler from 'serve-handler'
 
 export interface HyperlightConfiguration {
   host: string
   port: number
   dev: undefined | true
+  wsPort: number
 }
 
-export interface HyperlightPage {
+interface HyperlightPage {
   pageImport: any
   script: string
   outputPaths: {
@@ -38,14 +34,16 @@ export interface HyperlightPage {
 
 export class HyperlightServer {
   config: Partial<HyperlightConfiguration>
+
   app: App
 
-  cacheDir: string = pathJoin(process.cwd(), '.cache')
+  cacheDir: string = path.join(process.cwd(), '.cache')
 
   constructor(config?: Partial<HyperlightConfiguration>) {
     this.config = config ?? {}
     this.config.host ??= '127.0.0.1'
     this.config.port ??= 8080
+    this.config.wsPort ??= 8030
 
     this.app = new App()
 
@@ -56,18 +54,118 @@ export class HyperlightServer {
     this.config.dev ? this.devServer() : this.prodServer()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  devServer() {}
-
-  async prodServer() {
-    // Get all the files in the pages directory
-    const pagesDir = await utils.scanPages()
-
-    // Clear cache
+  async clearCache() {
     fs.existsSync(this.cacheDir)
       ? await fsRm(this.cacheDir, { recursive: true, force: true })
       : ''
 
+    await mkdir(this.cacheDir)
+  }
+
+  async removeFromCache(rmpath: string) {
+    await fsRm(
+      path.join(
+        this.cacheDir,
+        'bundled',
+        utils.convertFileExtension(rmpath, '.mjs')
+      )
+    )
+  }
+
+  async notFound(res: Response) {
+    res.statusCode = 404
+    res.end('Not found')
+  }
+
+  async devServer() {
+    const { reloadAll } = await utils.createLiveServerWs()
+
+    await this.clearCache() // Clear cache
+
+    chokidar
+      .watch('.', { cwd: 'pages/' })
+      .on('unlink', (path) => this.removeFromCache(path))
+      .on('add', (path) => bundlePage(path))
+      .on('change', (path) => {
+        reloadAll()
+        bundlePage(path)
+      })
+
+    this.app.use(async (req, res, next) => {
+      const hypotheticalFile = path.join(
+        this.cacheDir,
+        'bundled',
+        `${req.path}.mjs`
+      )
+
+      const hypotheticalFolder = path.join(this.cacheDir, 'bundled', req.path)
+
+      const pageModule = { modulePath: '', moduleImport: '' }
+
+      if (fs.existsSync(hypotheticalFile)) {
+        pageModule.modulePath = hypotheticalFile
+        pageModule.moduleImport = path.join('/bundled', `${req.path}.mjs`)
+      } else if (fs.existsSync(hypotheticalFolder)) {
+        pageModule.modulePath = path.join(hypotheticalFolder, 'index.mjs')
+        pageModule.moduleImport = path.join('/bundled', req.path, 'index.mjs')
+
+        if (!fs.existsSync(pageModule.modulePath)) {
+          next?.()
+          return
+        }
+      } else {
+        next?.()
+        return
+      }
+
+      const page = await import(pageModule.modulePath)
+      const view = page.default
+      const { getInitialState, getServerSideState } = page
+      const state = { ...getInitialState?.(), ...getServerSideState?.(req) }
+
+      const ssr = renderToString(view(state))
+
+      res
+        .type('text/html')
+        .send(
+          htmlTemplate(
+            devJsTemplate(
+              state,
+              pageModule.moduleImport,
+              this.config.host,
+              this.config.wsPort
+            ),
+            ssr,
+            utils.convertFileExtension(pageModule.moduleImport, '.css')
+          )
+        )
+    })
+
+    // TODO: this will not work
+    this.app.get('/livereload.js', (_, res) => {
+      res.sendFile(
+        path.resolve(
+          `node_modules/hyperlight/node_modules/@hyperlight/livereload/dist/index.js`
+        )
+      )
+    })
+
+    this.app.use('/bundled/', (req, res) =>
+      serveHandler(req, res, { public: path.join(this.cacheDir, 'bundled') })
+    )
+
+    this.app.listen(this.config.port)
+  }
+
+  async prodServer() {
+    // Get all the files in the pages directory
+    const pagesDir = await utils.scanPages('pages/')
+
+    this.clearCache() // Clear cache
+
+    console.time('Build time') // Time the build
+
+    // Symbol legenda
     console.log(`○ - Statically generated`)
     console.log('λ - Server-side rendered')
     console.log('\n')
@@ -77,25 +175,24 @@ export class HyperlightServer {
     for (const script of pagesDir) {
       const parsedScriptPath = path.parse(script)
 
-      const route = pathJoin(parsedScriptPath.dir, parsedScriptPath.name)
-      const normalizedRoute = utils.normalizeRoute(route)
+      const route = path.join(parsedScriptPath.dir, parsedScriptPath.name)
 
       const hyperlightPage: HyperlightPage = {
         script,
         pageImport: null,
         outputPaths: {
-          html: `${pathJoin(this.cacheDir, route)}.html`,
-          script: `${pathJoin(this.cacheDir, 'bundled', route)}.mjs`
+          html: `${path.join(this.cacheDir, route)}.html`,
+          script: `${path.join(this.cacheDir, 'bundled', route)}.mjs`
         },
         routes: {
-          base: normalizedRoute,
+          base: utils.normalizeRoute(route),
           html: `/${route}.html`,
           script: `/bundled/${route}.mjs`,
           stylesheet: `/bundled/${route}.css`
         }
       }
 
-      await bundlePage(hyperlightPage)
+      await bundlePage(hyperlightPage.script)
 
       // Dynamically import the pages (WARN: strictly requires esnext)
       hyperlightPage.pageImport = await import(
@@ -105,15 +202,15 @@ export class HyperlightServer {
       if (hyperlightPage.pageImport.getServerSideState) {
         // Differenciate between server side rendered page and statically generated ones
         console.log(`λ ${hyperlightPage.script}`)
-        this.app.get(
-          hyperlightPage.routes.base,
-          this.ssrMw(hyperlightPage, htmlTemplate, prodJsTemplate)
-        )
+        this.app.get(hyperlightPage.routes.base, this.ssrMw(hyperlightPage))
       } else {
         console.log(`○ ${hyperlightPage.script}`)
-        this.staticallyCache(hyperlightPage, htmlTemplate, prodJsTemplate)
+        this.staticallyCache(hyperlightPage)
       }
     }
+
+    // End the timer and post result
+    console.timeEnd('Build time')
 
     this.app.use('/bundled/', sirv(this.cacheDir))
 
@@ -127,17 +224,13 @@ export class HyperlightServer {
     )
   }
 
-  async staticallyCache(
-    page: HyperlightPage,
-    htmlTemplate: HtmlTemplate,
-    jsTemplate: JsTemplate
-  ) {
+  async staticallyCache(page: HyperlightPage) {
     const view = page.pageImport.default
     const state = page.pageImport.getInitialState?.() ?? {}
     const preRender = renderToString(view(state))
 
     const htmlContent = htmlTemplate(
-      jsTemplate(state, page.routes.script),
+      prodJsTemplate(state, page.routes.script),
       preRender,
       page.routes.stylesheet
     )
@@ -150,11 +243,7 @@ export class HyperlightServer {
     )
   }
 
-  ssrMw(
-    page: HyperlightPage,
-    htmlTemplate: HtmlTemplate,
-    jsTemplate: JsTemplate
-  ) {
+  ssrMw(page: HyperlightPage) {
     return async (req: Request, res: Response) => {
       const initialState = page.pageImport.getInitialState?.() ?? {}
       const serverSideState = page.pageImport.getServerSideState(req)
@@ -163,7 +252,10 @@ export class HyperlightServer {
       const state = { ...initialState, ...serverSideState }
 
       const htmlContent = htmlTemplate(
-        jsTemplate({ ...initialState, ...serverSideState }, page.routes.script),
+        prodJsTemplate(
+          { ...initialState, ...serverSideState },
+          page.routes.script
+        ),
         renderToString(view(state)),
         page.routes.stylesheet
       )

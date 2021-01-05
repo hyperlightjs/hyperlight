@@ -1,17 +1,17 @@
+// eslint-disable-next-line unused-imports/no-unused-imports
 import { jsx } from '@hyperlight/jsx'
 import { Request } from '@tinyhttp/app'
 
 import './module.css'
 
 function CustomComponent(props: any) {
-  //console.log(document.getElementsByName("head"));
-  return
+  return <p>Custom component</p>
 }
 
 export default (state: any) => {
   return (
     <section>
-      <p className="text">aaaa</p>
+      <p className="text">hello world</p>
       <p>bbbb</p>
       <p>{state.text}</p>
       <p>{state.test}</p>

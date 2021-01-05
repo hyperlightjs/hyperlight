@@ -1,13 +1,11 @@
 import esbuild from 'esbuild'
-import { join as pathJoin } from 'path'
-import { HyperlightPage } from './server'
 
-export async function bundlePage(page: HyperlightPage) {
+export async function bundlePage(scriptPath: string) {
   let build
 
   try {
     build = await esbuild.build({
-      entryPoints: [`pages/${page.script}`],
+      entryPoints: [`pages/${scriptPath}`],
       bundle: true,
       external: ['@tinyhttp/app'],
       platform: 'node',
@@ -25,7 +23,7 @@ export async function bundlePage(page: HyperlightPage) {
       }
     })
   } catch (e) {
-    console.error('[ERROR] Failed to compile: ' + e.message)
+    console.error(e.message)
     return
   }
 

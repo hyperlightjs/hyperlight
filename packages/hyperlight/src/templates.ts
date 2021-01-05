@@ -1,12 +1,5 @@
-export type HtmlTemplate = (
-  js: string,
-  preRender: string,
-  stylesheet: string
-) => string
-export type JsTemplate = (state: any, view: any) => string
-
-export const prodJsTemplate: JsTemplate = (state: any, pagePath: string) => `
-import { app } from './hyperapp.js'
+export const prodJsTemplate = (state: any, pagePath: string) => `
+import { app } from '/hyperapp.js'
 import view from '${pagePath}'
 
 app({
@@ -16,7 +9,27 @@ app({
 })
 `
 
-export const htmlTemplate: HtmlTemplate = (
+export const devJsTemplate = (
+  state: any,
+  pagePath: string,
+  wsHost?: string,
+  wsPort?: number
+) => `
+import { app } from '/hyperapp.js'
+import view from '${pagePath}'
+
+import { livereload } from '/livereload.js'
+const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
+
+app({
+  init: savedState ?? ${JSON.stringify(state)},
+  view,
+  node: document.getElementById('app'),
+  middleware
+})
+`
+
+export const htmlTemplate = (
   js: string,
   preRender: string,
   stylesheet: string
