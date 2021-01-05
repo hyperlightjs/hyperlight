@@ -1,7 +1,9 @@
-![Logo](logo.png)
-
 <p align="center">
-  <a href="https://npmjs.org/package/hyperlight"><img src="https://img.shields.io/npm/dt/hyperlight?color=cyan&style=for-the-badge" /></a>
+  <img src="https://github.com/BRA1L0R/hyperlight/raw/master/logo.png" alt="Logo" />
+  <br />
+  <a href="https://npmjs.org/package/hyperlight"><img src="https://img.shields.io/npm/dt/hyperlight?color=cyan&style=for-the-badge" alt="Downloads" /> </a>
+  <a href="https://npmjs.org/package/hyperlight"><img alt="npm" src="https://img.shields.io/npm/v/hyperlight?color=cyan&style=for-the-badge" />
+  </a>
 </p>
 
 Next-gen **[Hyperapp](https://github.com/jorgebucaran/hyperapp)** framework.
@@ -11,3 +13,13 @@ Next-gen **[Hyperapp](https://github.com/jorgebucaran/hyperapp)** framework.
 - **JSX support**. Use [`@hyperlight/jsx`]() for automatic JSX support.
 - **Types out of the box**. Written in TypeScript, it provides types out of the box.
 - **Dev server with persisting state**. State is preserved on file change.
+
+## Install
+
+```sh
+pnpm i hyperlight
+```
+
+## Documentation
+
+Coming soon
