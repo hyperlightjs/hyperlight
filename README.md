@@ -14,7 +14,7 @@ Next-gen **[Hyperapp](https://github.com/jorgebucaran/hyperapp)** framework.
 - **JSX support**. Install [`@hyperlight/jsx`](packages/jsx) for automatic JSX support.
 - **Types out of the box**. Being written in TypeScript, it provides types out of the box.
 - **Dev server with persisting state**. State is preserved on file change in development mode.
-- **ESM on both client and server**. No pain with legacy CommonJS problems.
+- **ESM on both client and server**. No problems with legacy CommonJS.
 
 ## Quick start
 
