@@ -1,23 +1,18 @@
 {
-  "name": "@hyperlight/jsx",
-  "version": "0.0.0",
-  "description": "Jsx factory for hyperlight",
+  "name": "@hyperlight/livereload",
+  "version": "1.0.0",
+  "description": "",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "rollup -c"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "hyperapp": "^2.0.8"
-  },
   "devDependencies": {
-    "rollup": "^2.35.1",
+    "rollup": "^2.36.0",
     "rollup-plugin-ts": "^1.3.7",
     "tslib": "^2.0.3"
   }
