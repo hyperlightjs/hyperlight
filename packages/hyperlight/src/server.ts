@@ -244,8 +244,9 @@ export class HyperlightServer {
   }
 
   ssrMw(page: HyperlightPage) {
+    const initialState = page.pageImport.getInitialState?.() ?? {}
+
     return async (req: Request, res: Response) => {
-      const initialState = page.pageImport.getInitialState?.() ?? {}
       const serverSideState = page.pageImport.getServerSideState(req)
       const view = page.pageImport.default
 
