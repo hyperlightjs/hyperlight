@@ -1,4 +1,4 @@
-![Logo](logo.svg)
+![Logo](logo.png)
 
 <p align="center">
   <a href="https://npmjs.org/package/hyperlight"><img src="https://img.shields.io/npm/dt/hyperlight?color=cyan&style=for-the-badge" /></a>
