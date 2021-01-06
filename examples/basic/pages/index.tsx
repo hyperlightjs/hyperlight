@@ -12,7 +12,7 @@ export default (state: any) => {
   return (
     <section>
       <p className="text">Hello world</p>
-      <p>bbbb</p>
+      <p>cddd</p>
       <p>{state.text}</p>
       <p>{state.test}</p>
       <CustomComponent>component</CustomComponent>
@@ -31,7 +31,10 @@ export default (state: any) => {
 }
 
 export const getServerSideState = (req: Request) => {
-  return { test: 'I <3 server side state', headers: req.headers['user-agent'] }
+  return {
+    test: 'I <3 server side state x2',
+    headers: req.headers['user-agent']
+  }
 }
 
 export const getInitialState = () => {

@@ -9,7 +9,7 @@ import sirv from 'sirv'
 import chokidar from 'chokidar'
 import * as utils from './utils'
 import serveHandler from 'serve-handler'
-import { info } from './logging'
+import { error, info } from './logging'
 
 export interface HyperlightConfiguration {
   host: string
@@ -43,6 +43,8 @@ export class HyperlightServer {
   bundledDir: string = path.join(this.cacheDir, 'bundled/')
   pagesDir: string = path.join(process.cwd(), 'pages/')
 
+  hyperappJs = 'node_modules/hyperapp/hyperapp.js'
+
   constructor(config?: Partial<HyperlightConfiguration>) {
     this.config = config ?? {}
 
@@ -51,6 +53,11 @@ export class HyperlightServer {
     this.config.wsPort ??= 8030
 
     this.app = new App()
+
+    if (!fs.existsSync(this.hyperappJs)) {
+      error("Package 'hyperapp' is not installed!")
+      return
+    }
 
     this.app.get('/hyperapp.js', (_, res) => {
       res.sendFile(path.resolve(`node_modules/hyperapp/hyperapp.js`))
@@ -85,6 +92,9 @@ export class HyperlightServer {
 
   async devServer() {
     const { reloadAll } = await utils.createLiveServerWs()
+    const liveReloadCode = `export ${await (
+      await import('@hyperlight/livereload/dist/index.js')
+    ).livereload.toString()}`
 
     await this.clearCache() // Clear cache
 
@@ -122,7 +132,14 @@ export class HyperlightServer {
         return
       }
 
-      const page = await import(pageModule.modulePath)
+      const randomImport = Math.round(Math.random() * 1000000)
+
+      // Since import() caches imports, just adding a query param (that has no effect on node) prevents it from caching
+      // At the moment just a Math.random() is good enough, there will be 1 in a million chance of getting a cached file
+
+      const page = await import(
+        `${pageModule.modulePath}?random=${randomImport}`
+      )
       const view = page.default
       const { getInitialState, getServerSideState } = page
       const state = { ...getInitialState?.(), ...getServerSideState?.(req) }
@@ -145,13 +162,8 @@ export class HyperlightServer {
         )
     })
 
-    // TODO: this will not work
     this.app.get('/livereload.js', (_, res) => {
-      res.sendFile(
-        path.resolve(
-          `node_modules/hyperlight/node_modules/@hyperlight/livereload/dist/index.js`
-        )
-      )
+      res.type('text/javascript').send(liveReloadCode)
     })
 
     this.app.use('/bundled/', (req, res) =>

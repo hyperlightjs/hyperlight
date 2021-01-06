@@ -20,7 +20,6 @@ export function livereload(wsHost: string, wsPort: string) {
   function middleware(dispatch: any) {
     return (state: any, ...args: any) => {
       if (typeof state !== 'function' && !Array.isArray(state)) {
-        console.log(currentState)
         currentState = state
       }
 
