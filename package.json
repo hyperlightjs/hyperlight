@@ -1,6 +1,5 @@
 {
   "name": "hyperlight",
-  "version": "0.0.2",
   "private": true,
   "engines": {
     "node": ">=12.4"
