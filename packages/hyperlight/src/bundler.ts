@@ -1,6 +1,6 @@
 import esbuild from 'esbuild'
 import path from 'path'
-import chalk from 'chalk'
+import { gray } from 'colorette'
 import { info } from './logging'
 
 interface BundlerOptions {
@@ -19,11 +19,9 @@ export async function bundlePage(
     options?.verbose ? info(message) : false
 
   bundleLog(
-    chalk.grey(
-      `${new Date().toLocaleTimeString('en-US')} - Detected file change`
-    )
+    gray(`${new Date().toLocaleTimeString('en-US')} - Detected file change`)
   )
-  bundleLog(chalk.white(`Bundling ${entryPoint}\n`))
+  bundleLog(`Bundling ${entryPoint}\n`)
 
   try {
     build = await esbuild.build({

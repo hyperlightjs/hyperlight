@@ -1,15 +1,15 @@
-import chalk from 'chalk'
+import { bgCyan, bold, black, bgRed, bgYellow } from 'colorette'
 
-const boldBlack = (text: string) => chalk.bold(chalk.black(text))
+const boldBlack = (text: string) => bold(black(text))
 
 export function info(message: string) {
-  console.log(`${boldBlack(chalk.bgCyan(' INFO '))} ${message}`)
+  console.log(`${boldBlack(bgCyan(' INFO '))} ${message}`)
 }
 
 export function error(message: string) {
-  console.log(`${chalk.bgRed(' ERROR ')} ${message}`)
+  console.log(`${bgRed(' ERROR ')} ${message}`)
 }
 
 export function warning(message: string) {
-  console.log(`${boldBlack(chalk.bgYellow(' WARN '))} ${message}`)
+  console.log(`${boldBlack(bgYellow(' WARN '))} ${message}`)
 }

@@ -162,7 +162,7 @@ export class HyperlightServer {
     // Get all the files in the pages directory
     const pagesDir = await utils.scanPages('pages/')
 
-    this.clearCache() // Clear cache
+    await this.clearCache() // Clear cache
 
     console.time('Build time') // Time the build
 
@@ -213,13 +213,13 @@ export class HyperlightServer {
     // End the timer and post result
     console.timeEnd('Build time')
 
-    this.app.use('/bundled/', sirv(this.cacheDir))
+    this.app.use('/bundled/', sirv(path.join(this.cacheDir, 'bundled')))
 
     this.app.listen(
       this.config.port,
       () =>
         info(
-          `\nServer is now listening on port: ${this.config.host}:${this.config.port}`
+          `Server is now listening on ${this.config.host}:${this.config.port}`
         ),
       this.config.host
     )
