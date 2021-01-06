@@ -9,11 +9,6 @@
 
 Next-gen **[Hyperapp](https://github.com/jorgebucaran/hyperapp)** framework.
 
-- **Flexible.** Exports pages with server functions (SSR) or statically (SSG).
-- **Fast.** Uses [esbuild](https://github.com/evanw/esbuild/) for bundling and [Hyperapp](https://github.com/jorgebucaran/hyperapp) (1KB) as view layer.
-- **Modern**. ESM everywhere, including server code. Targeting ES2019 for minimal output.
-- **Developer friendly**. Dev server with persisting state, [JSX support](packages/jsx) and types out of the box.
-
 ## Quick start
 
 ```sh

@@ -1,6 +1,10 @@
 {
   "name": "hyperlight",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BRA1L0R/hyperlight"
+  },
   "scripts": {
     "prerelease": "pnpm lint && pnpm build && pnpm test",
     "chgset:run": "changeset",

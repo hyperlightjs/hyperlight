@@ -1,14 +1,25 @@
 {
   "name": "@hyperlight/livereload",
-  "version": "1.0.1",
-  "description": "",
+  "version": "1.0.2",
+  "description": "Live reload for Hyperapp with persisting state.",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c ../../rollup.config.js"
   },
-  "keywords": [],
+  "keywords": [
+    "hyperlight",
+    "hyperapp",
+    "dev-middleware",
+    "dev-server",
+    "livereload"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BRA1L0R/hyperlight",
+    "directory": "livereload"
+  }
 }

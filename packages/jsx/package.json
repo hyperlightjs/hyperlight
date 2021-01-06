@@ -1,10 +1,11 @@
 {
   "name": "@hyperlight/jsx",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "JSX support for Hyperlight.",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "license": "MIT",
   "files": [
     "dist"
   ],
@@ -12,11 +13,12 @@
     "build": "rollup -c ../../rollup.config.js"
   },
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "hyperapp": "^2.0.8"
   },
-  "devDependencies": {
-    "tslib": "^2.0.3"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BRA1L0R/hyperlight",
+    "directory": "jsx"
   }
 }
