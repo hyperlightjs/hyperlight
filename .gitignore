@@ -5,6 +5,7 @@ log.txt
 coverage
 examples/*/.env
 pnpm-lock.yaml
+./pnpm-lock.yaml
 .next
 .cache
 .clinic
