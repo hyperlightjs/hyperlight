@@ -7,6 +7,9 @@
   },
   "keywords": [],
   "author": "",
+  "engines": {
+    "node": ">=12.4"
+  },
   "license": "ISC",
   "dependencies": {
     "@hyperlight/jsx": "workspace:*",

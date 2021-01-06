@@ -1,6 +1,10 @@
 {
   "name": "hyperlight",
+  "version": "0.0.2",
   "private": true,
+  "engines": {
+    "node": ">=12.4"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/BRA1L0R/hyperlight"
