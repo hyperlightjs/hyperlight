@@ -4,7 +4,7 @@ import { Request } from '@tinyhttp/app'
 
 import './module.css'
 
-function CustomComponent(props: any) {
+function CustomComponent() {
   return <p>Custom component</p>
 }
 

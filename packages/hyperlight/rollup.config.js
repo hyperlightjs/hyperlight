@@ -13,7 +13,7 @@ export default [
   },
   {
     ...common,
-    input: 'src/hyperlight.ts',
+    input: 'src/cli.ts',
     output: [
       {
         file: 'dist/hyperlight.js',

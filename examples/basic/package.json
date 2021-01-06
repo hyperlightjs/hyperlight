@@ -3,7 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "start": "hyperlight"
+    "start": "hyperlight prod",
+    "dev": "hyperlight dev"
   },
   "keywords": [],
   "author": "",

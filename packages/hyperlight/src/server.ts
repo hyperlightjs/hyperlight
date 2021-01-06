@@ -46,8 +46,8 @@ export class HyperlightServer {
   constructor(config?: Partial<HyperlightConfiguration>) {
     this.config = config ?? {}
 
-    this.config.host ??= '127.0.0.1'
-    this.config.port ??= 8080
+    this.config.host ??= 'localhost'
+    this.config.port ??= 3000
     this.config.wsPort ??= 8030
 
     this.app = new App()
@@ -162,7 +162,7 @@ export class HyperlightServer {
       this.config.port,
       () =>
         info(
-          `Server is now listening on: ${this.config.host}:${this.config.port}\n\n` // Comunicate that the server is now listening
+          `Started on: http://${this.config.host}:${this.config.port}\n\n` // Comunicate that the server is now listening
         ),
       this.config.host
     )
