@@ -1,6 +1,6 @@
 {
   "name": "hyperlight",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "The Hyperapp Framework.",
   "type": "module",
   "main": "dist/index.js",
@@ -29,7 +29,7 @@
     "@types/ws": "^7.4.0"
   },
   "scripts": {
-    "build": "rollup -c "
+    "build": "rollup -c"
   },
   "dependencies": {
     "@hyperlight/livereload": "workspace:*",

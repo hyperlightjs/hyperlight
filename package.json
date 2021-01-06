@@ -1,20 +1,21 @@
 {
   "name": "hyperlight",
+  "private": true,
   "scripts": {
     "prerelease": "pnpm lint && pnpm build && pnpm test",
     "chgset:run": "changeset",
     "chgset:version": "changeset version",
-    "chgset": "pnpm chgset:run && pnpm chgset:version",
+    "rm-changelogs": "rm -rf packages/*/CHANGELOG.md",
+    "chgset": "pnpm chgset:run && pnpm chgset:version && pnpm rm-changelogs",
     "release": "changeset publish",
     "test": "jest --detectOpenHandles",
     "lint": "eslint . --ext=js,mjs,ts,cjs",
     "format": "prettier --check \"./**/*.{ts,js,mjs,cjs,json}\"",
     "format:write": "prettier --check \"./**/*.{ts,js,mjs,cjs,json}\" -w",
-    "echo:ancestor": "echo ${ANCESTOR_REF:-$(git merge-base origin/master HEAD)}",
-    "build": "pnpm -r build",
-    "build:ancestor": "pnpm --filter ...[$(pnpm --silent echo:ancestor)] build"
+    "build": "pnpm -r build"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.12.0",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@rollup/plugin-typescript": "^8.1.0",
