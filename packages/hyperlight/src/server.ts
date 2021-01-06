@@ -16,6 +16,7 @@ export interface HyperlightConfiguration {
   port: number
   dev: undefined | true
   wsPort: number
+  prodOperation: 'BUILD' | 'SERVE'
 }
 
 interface HyperlightPage {
@@ -39,9 +40,12 @@ export class HyperlightServer {
   app: App
 
   cacheDir: string = path.join(process.cwd(), '.cache')
+  bundledDir: string = path.join(this.cacheDir, 'bundled/')
+  pagesDir: string = path.join(process.cwd(), 'pages/')
 
   constructor(config?: Partial<HyperlightConfiguration>) {
     this.config = config ?? {}
+
     this.config.host ??= '127.0.0.1'
     this.config.port ??= 8080
     this.config.wsPort ??= 8030
@@ -52,7 +56,13 @@ export class HyperlightServer {
       res.sendFile(path.resolve(`node_modules/hyperapp/hyperapp.js`))
     })
 
-    this.config.dev ? this.devServer() : this.prodServer()
+    if (this.config.dev) {
+      this.devServer()
+    } else if (this.config.prodOperation === 'BUILD') {
+      this.prodBuild()
+    } else {
+      this.prodServe()
+    }
   }
 
   async clearCache() {
@@ -73,33 +83,26 @@ export class HyperlightServer {
     )
   }
 
-  async notFound(res: Response) {
-    res.statusCode = 404
-    res.end('Not found')
-  }
-
   async devServer() {
     const { reloadAll } = await utils.createLiveServerWs()
 
     await this.clearCache() // Clear cache
 
     chokidar
-      .watch('.', { cwd: 'pages/', ignored: /^.*\.(css)$/ })
+      .watch('.', { cwd: this.pagesDir, ignored: /^.*\.(css)$/ })
       .on('unlink', (path) => this.removeFromCache(path))
-      .on('add', (path) => bundlePage(path, { verbose: true }))
-      .on('change', (path) => {
+      .on('add', (filepath) =>
+        bundlePage(path.join(this.pagesDir, filepath), { verbose: true })
+      )
+      .on('change', (filepath) => {
         reloadAll()
-        bundlePage(path, { verbose: true })
+        bundlePage(path.join(this.pagesDir, filepath), { verbose: true })
       })
 
     this.app.use(async (req, res, next) => {
-      const hypotheticalFile = path.join(
-        this.cacheDir,
-        'bundled',
-        `${req.path}.mjs`
-      )
+      const hypotheticalFile = path.join(this.bundledDir, `${req.path}.mjs`)
 
-      const hypotheticalFolder = path.join(this.cacheDir, 'bundled', req.path)
+      const hypotheticalFolder = path.join(this.bundledDir, req.path)
 
       const pageModule = { modulePath: '', moduleImport: '' }
 
@@ -152,19 +155,33 @@ export class HyperlightServer {
     })
 
     this.app.use('/bundled/', (req, res) =>
-      serveHandler(req, res, { public: path.join(this.cacheDir, 'bundled') })
+      serveHandler(req, res, { public: this.bundledDir })
     )
 
-    this.app.listen(this.config.port)
+    this.app.listen(
+      this.config.port,
+      () =>
+        info(
+          `Server is now listening on: ${this.config.host}:${this.config.port}\n\n` // Comunicate that the server is now listening
+        ),
+      this.config.host
+    )
   }
 
-  async prodServer() {
+  async prodBuild() {
+    const pagesDir = await utils.scanPages(this.pagesDir)
+
+    await this.clearCache() // Clear cache folder
+
+    for (const script of pagesDir)
+      bundlePage(path.join(this.pagesDir, script), {
+        outDir: this.bundledDir
+      }) // bundle every page
+  }
+
+  async prodServe() {
     // Get all the files in the pages directory
-    const pagesDir = await utils.scanPages('pages/')
-
-    await this.clearCache() // Clear cache
-
-    console.time('Build time') // Time the build
+    const pagesDir = await utils.scanPages(this.pagesDir)
 
     // Symbol legenda
     console.log(`○ - Statically generated`)
@@ -183,7 +200,7 @@ export class HyperlightServer {
         pageImport: null,
         outputPaths: {
           html: `${path.join(this.cacheDir, route)}.html`,
-          script: `${path.join(this.cacheDir, 'bundled', route)}.mjs`
+          script: `${path.join(this.bundledDir, route)}.mjs`
         },
         routes: {
           base: utils.normalizeRoute(route),
@@ -192,8 +209,6 @@ export class HyperlightServer {
           stylesheet: `/bundled/${route}.css`
         }
       }
-
-      await bundlePage(hyperlightPage.script)
 
       // Dynamically import the pages (WARN: strictly requires esnext)
       hyperlightPage.pageImport = await import(
@@ -210,10 +225,7 @@ export class HyperlightServer {
       }
     }
 
-    // End the timer and post result
-    console.timeEnd('Build time')
-
-    this.app.use('/bundled/', sirv(path.join(this.cacheDir, 'bundled')))
+    this.app.use('/bundled/', sirv(this.bundledDir))
 
     this.app.listen(
       this.config.port,

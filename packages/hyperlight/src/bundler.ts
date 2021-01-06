@@ -5,6 +5,7 @@ import { info } from './logging'
 
 interface BundlerOptions {
   verbose: boolean
+  inputDir: string
   outDir: string
 }
 
@@ -13,7 +14,7 @@ export async function bundlePage(
   options?: Partial<BundlerOptions>
 ) {
   let build: esbuild.BuildResult
-  const entryPoint = path.join(options?.outDir ?? 'pages', scriptPath)
+  const entryPoint = path.join(options?.inputDir ?? '', scriptPath)
 
   const bundleLog = (message: string) =>
     options?.verbose ? info(message) : false
@@ -32,7 +33,7 @@ export async function bundlePage(
       jsxFactory: 'jsx',
       jsxFragment: 'Fragment',
       format: 'esm',
-      outdir: `.cache/bundled`,
+      outdir: options.outDir ?? `.cache/bundled`,
       outbase: 'pages',
       outExtension: {
         '.js': '.mjs'
