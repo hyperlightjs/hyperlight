@@ -9,6 +9,7 @@ import sirv from 'sirv'
 import chokidar from 'chokidar'
 import * as utils from './utils'
 import serveHandler from 'serve-handler'
+import { info } from './logging'
 
 export interface HyperlightConfiguration {
   host: string
@@ -83,12 +84,12 @@ export class HyperlightServer {
     await this.clearCache() // Clear cache
 
     chokidar
-      .watch('.', { cwd: 'pages/' })
+      .watch('.', { cwd: 'pages/', ignored: /^.*\.(css)$/ })
       .on('unlink', (path) => this.removeFromCache(path))
-      .on('add', (path) => bundlePage(path))
+      .on('add', (path) => bundlePage(path, { verbose: true }))
       .on('change', (path) => {
         reloadAll()
-        bundlePage(path)
+        bundlePage(path, { verbose: true })
       })
 
     this.app.use(async (req, res, next) => {
@@ -217,7 +218,7 @@ export class HyperlightServer {
     this.app.listen(
       this.config.port,
       () =>
-        console.log(
+        info(
           `\nServer is now listening on port: ${this.config.host}:${this.config.port}`
         ),
       this.config.host
@@ -237,7 +238,6 @@ export class HyperlightServer {
 
     await utils.writeFileRecursive(htmlContent, page.outputPaths.html)
 
-    console.log(page.outputPaths.html)
     this.app.get(page.routes.base, (_, res) =>
       res.sendFile(page.outputPaths.html)
     )
