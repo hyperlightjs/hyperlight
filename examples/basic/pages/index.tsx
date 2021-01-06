@@ -11,7 +11,7 @@ function CustomComponent(props: any) {
 export default (state: any) => {
   return (
     <section>
-      <p className="text">hello world</p>
+      <p className="text">Hello world</p>
       <p>bbbb</p>
       <p>{state.text}</p>
       <p>{state.test}</p>

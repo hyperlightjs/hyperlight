@@ -34,6 +34,7 @@
   "dependencies": {
     "@hyperlight/livereload": "workspace:*",
     "@tinyhttp/app": "^1.1.5",
+    "chalk": "^4.1.0",
     "chokidar": "github:paulmillr/chokidar",
     "esbuild": "^0.8.29",
     "hyperapp": "^2.0.8",
