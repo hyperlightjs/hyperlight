@@ -25,6 +25,7 @@ export default (state: State) => {
   return (
     <section>
       <p className="text">Hello world</p>
+      <img src="/logo.png" />
       <p>cddd</p>
       <p>{state.text}</p>
       <p>{state.test}</p>

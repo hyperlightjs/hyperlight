@@ -42,6 +42,7 @@ export class HyperlightServer {
   cacheDir: string = path.join(process.cwd(), '.cache')
   bundledDir: string = path.join(this.cacheDir, 'bundled/')
   pagesDir: string = path.join(process.cwd(), 'pages/')
+  publicDir: string = path.join(process.cwd(), 'public/')
 
   hyperappJs = 'node_modules/hyperapp/hyperapp.js'
 
@@ -193,6 +194,10 @@ export class HyperlightServer {
       serveHandler(req, res, { public: this.bundledDir })
     )
 
+    this.app.use('/', (req, res) =>
+      serveHandler(req, res, { public: this.publicDir, symlinks: true })
+    )
+
     this.app.listen(
       this.config.port,
       () =>
@@ -261,6 +266,8 @@ export class HyperlightServer {
     }
 
     this.app.use('/bundled/', sirv(this.bundledDir))
+
+    this.app.use('/', sirv(this.publicDir))
 
     this.app.listen(
       this.config.port,
