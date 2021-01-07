@@ -1,7 +1,7 @@
 import esbuild from 'esbuild'
 import path from 'path'
 import { gray } from 'colorette'
-import { info } from './logging'
+import { error, info } from './logging'
 
 interface BundlerOptions {
   verbose: boolean
@@ -44,8 +44,8 @@ export async function bundlePage(
       }
     })
   } catch (e) {
-    bundleLog('FAILED!\n')
-    console.error(e.message)
+    error('FAILED!\n')
+    error(e.message)
     return
   }
 
