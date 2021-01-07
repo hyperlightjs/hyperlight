@@ -4,7 +4,7 @@ import { Request } from '@tinyhttp/app'
 
 import './module.css'
 
-function FragmentComponent(props, children) {
+function FragmentComponent(props: Record<string, any>, children: any[]) {
   return (
     <>
       <p>Custom component</p>
@@ -15,7 +15,13 @@ function FragmentComponent(props, children) {
   )
 }
 
-export default (state: any) => {
+type State = Partial<{
+  text: string
+  test: string
+  headers: string
+}>
+
+export default (state: State) => {
   return (
     <section>
       <p className="text">Hello world</p>
@@ -32,7 +38,7 @@ export default (state: any) => {
 
       <input
         value={state.text}
-        oninput={(state, event: { target: HTMLInputElement }) => {
+        oninput={(state: State, event: { target: HTMLInputElement }) => {
           return { ...state, text: event.target.value }
         }}
       />
@@ -40,14 +46,14 @@ export default (state: any) => {
   )
 }
 
-export const getServerSideState = (req: Request) => {
+export const getServerSideState = (req: Request): State => {
   return {
     test: 'I <3 server side state x2',
     headers: req.headers['user-agent']
   }
 }
 
-export const getInitialState = () => {
+export const getInitialState = (): State => {
   return {
     text: 'hello world'
   }
