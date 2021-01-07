@@ -1,9 +1,9 @@
-import { App, Request, Response } from '@tinyhttp/app'
+import { App, NextFunction, Request, Response } from '@tinyhttp/app'
 import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm, mkdir } from 'fs/promises'
+import { rm as fsRm, mkdir, readFile } from 'fs/promises'
 import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
 import chokidar from 'chokidar'
@@ -52,7 +52,9 @@ export class HyperlightServer {
     this.config.port ??= 3000
     this.config.wsPort ??= 8030
 
-    this.app = new App()
+    this.app = new App({
+      onError: this.appErrorHandler
+    })
 
     if (!fs.existsSync(this.hyperappJs)) {
       error("Package 'hyperapp' is not installed!")
@@ -70,6 +72,19 @@ export class HyperlightServer {
     } else {
       this.prodServe()
     }
+  }
+
+  async appErrorHandler(
+    err: any,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    if (err.code !== 404) error(err.message)
+    else if (err.code === 404) res.send('404 Not found')
+    else res.send(err)
+
+    next?.()
   }
 
   async clearCache() {
@@ -128,8 +143,16 @@ export class HyperlightServer {
           return
         }
       } else {
-        next?.()
-        return
+        const slugScan = await utils.scanForSlug(this.bundledDir, req.path)
+        if (!slugScan) {
+          next?.()
+          return
+        }
+
+        pageModule.moduleImport = slugScan.moduleImport
+        pageModule.modulePath = path.join(this.bundledDir, slugScan.module)
+
+        req.params = { ...slugScan.slug }
       }
 
       const randomImport = Math.round(Math.random() * 1000000)
@@ -233,7 +256,7 @@ export class HyperlightServer {
         this.app.get(hyperlightPage.routes.base, this.ssrMw(hyperlightPage))
       } else {
         console.log(`○ ${hyperlightPage.script}`)
-        this.staticallyCache(hyperlightPage)
+        this.useStaticCache(hyperlightPage)
       }
     }
 
@@ -249,7 +272,7 @@ export class HyperlightServer {
     )
   }
 
-  async staticallyCache(page: HyperlightPage) {
+  async useStaticCache(page: HyperlightPage) {
     const view = page.pageImport.default
     const state = page.pageImport.getInitialState?.() ?? {}
     const preRender = renderToString(view(state))
@@ -262,8 +285,12 @@ export class HyperlightServer {
 
     await utils.writeFileRecursive(htmlContent, page.outputPaths.html)
 
+    const memoryCache = await readFile(page.outputPaths.html, {
+      encoding: 'utf-8'
+    })
+
     this.app.get(page.routes.base, (_, res) =>
-      res.sendFile(page.outputPaths.html)
+      res.type('text/html').send(memoryCache)
     )
   }
 

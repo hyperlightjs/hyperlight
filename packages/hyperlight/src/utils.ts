@@ -5,10 +5,14 @@ import path from 'path'
 import ws from 'ws'
 
 export function normalizeRoute(route: string) {
-  const lastIndex = route.lastIndexOf('index')
+  let resultRoute = route
 
-  if (lastIndex >= 0) return route.slice(0, lastIndex)
-  else return route
+  const lastIndex = resultRoute.lastIndexOf('index')
+  if (lastIndex >= 0) resultRoute = resultRoute.slice(0, lastIndex)
+
+  resultRoute = resultRoute.replaceAll(/\[(.+)\]/g, (_, slug) => `:${slug}`)
+
+  return resultRoute
 }
 
 export async function writeFileRecursive(html: string, writePath: string) {
@@ -25,6 +29,41 @@ export async function scanPages(dir: string) {
   })
 
   return dirScan.map((v) => v.path)
+}
+
+export async function scanForSlug(
+  scanDir: string,
+  route: string
+): Promise<{
+  route: string
+  slug: any
+  moduleImport: string
+  module: string
+} | null> {
+  const routeParse = path.parse(route)
+  const folderScan = await (
+    await readdir.promise(path.join(scanDir, routeParse.dir), { depth: 0 })
+  ).map((v) => v.path)
+
+  if (!folderScan) return null
+
+  const slugRegexp = /\[(.+)\]/
+  const slugFile = folderScan.find((v) => v.match(slugRegexp)?.length > 0)
+
+  if (!slugFile) return null
+
+  const match = slugFile.match(slugRegexp)[0]
+  const slugName = match.substring(1, match.length - 1)
+
+  const slug = []
+  slug[slugName] = routeParse.name
+
+  return {
+    route: `${routeParse.dir}/`,
+    slug,
+    module: path.join(routeParse.dir, slugFile),
+    moduleImport: path.join('/bundled', routeParse.dir, `${match}.mjs`)
+  }
 }
 
 export function convertFileExtension(file: string, newExtension: string) {
