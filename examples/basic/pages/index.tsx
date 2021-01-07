@@ -4,8 +4,15 @@ import { Request } from '@tinyhttp/app'
 
 import './module.css'
 
-function CustomComponent() {
-  return <p>Custom component</p>
+function FragmentComponent(props, children) {
+  return (
+    <>
+      <p>Custom component</p>
+      <p>With fragment</p>
+      <p>Property: {props.testProp}</p>
+      <p>Children: {...children}</p>
+    </>
+  )
 }
 
 export default (state: any) => {
@@ -15,7 +22,10 @@ export default (state: any) => {
       <p>cddd</p>
       <p>{state.text}</p>
       <p>{state.test}</p>
-      <CustomComponent>component</CustomComponent>
+      <FragmentComponent testProp="Hello component!">
+        <p>children1</p>
+        <p>children2</p>
+      </FragmentComponent>
       <p>
         Server side prop {'=>'} {state.headers}
       </p>

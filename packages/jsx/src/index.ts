@@ -1,16 +1,18 @@
 // @ts-ignore
 import { h, text } from 'hyperapp'
 
-const jsxify = (h: any) => (type: any, props: any, ...children: any[]) =>
-  typeof type === 'function'
+const p = (c: any[]) =>
+  []
+    .concat(...c)
+    .map((any) =>
+      typeof any === 'string' || typeof any === 'number' ? text(any) : any
+    )
+
+const fragment = (_props: any, children: any[]) => children
+
+const jsxify = (h: any) => (type: any, props: any, ...children: any[]) => {
+  return typeof type === 'function'
     ? type(props, children)
-    : h(
-        type,
-        props || {},
-        []
-          .concat(...children)
-          .map((any) =>
-            typeof any === 'string' || typeof any === 'number' ? text(any) : any
-          )
-      )
-export const jsx = jsxify(h) /** @jsx jsx */
+    : h(type, props || {}, p(children))
+}
+export const jsx = { fa: jsxify(h), fr: fragment } /** @jsx jsx.jsx */
