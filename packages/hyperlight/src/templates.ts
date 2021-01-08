@@ -1,4 +1,8 @@
-export const prodJsTemplate = (state: any, pagePath: string) => `
+import { minify } from 'terser'
+
+export const prodJsTemplate = async (state: any, pagePath: string) =>
+  (
+    await minify(`
 import { app } from '/hyperapp.js'
 import view from '${pagePath}'
 
@@ -7,7 +11,8 @@ app({
   view,
   node: document.getElementById('app')
 })
-`
+`)
+  ).code
 
 export const devJsTemplate = (
   state: any,

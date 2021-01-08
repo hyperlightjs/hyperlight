@@ -38,6 +38,7 @@ export async function bundlePage(
       outExtension: {
         '.js': '.mjs'
       },
+      minify: true,
       splitting: true,
       define: {
         NODE_ENV: 'development'

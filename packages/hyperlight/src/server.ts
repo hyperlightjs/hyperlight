@@ -3,7 +3,7 @@ import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm, readFile } from 'fs/promises'
+import { rm as fsRm } from 'fs/promises'
 import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
 import chokidar from 'chokidar'
@@ -282,19 +282,13 @@ export class HyperlightServer {
     const preRender = renderToString(view(state))
 
     const htmlContent = htmlTemplate(
-      prodJsTemplate(state, page.routes.script),
+      await prodJsTemplate(state, page.routes.script),
       preRender,
       page.routes.stylesheet
     )
 
-    await utils.writeFileRecursive(htmlContent, page.outputPaths.html)
-
-    const memoryCache = await readFile(page.outputPaths.html, {
-      encoding: 'utf-8'
-    })
-
     this.app.get(page.routes.base, (_, res) =>
-      res.type('text/html').send(memoryCache)
+      res.type('text/html').send(htmlContent)
     )
   }
 
@@ -308,7 +302,7 @@ export class HyperlightServer {
       const state = { ...initialState, ...serverSideState }
 
       const htmlContent = htmlTemplate(
-        prodJsTemplate(
+        await prodJsTemplate(
           { ...initialState, ...serverSideState },
           page.routes.script
         ),
