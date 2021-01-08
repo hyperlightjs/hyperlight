@@ -3,12 +3,12 @@ import cac from 'cac'
 import { bundlePage } from './bundler'
 import * as utils from './utils/utils'
 import path from 'path'
-import { htmlTemplate, prodJsTemplate } from './templates'
+import { prodJsTemplate } from './templates'
 import { warning } from './utils/logging'
-import { renderToString } from 'hyperapp-render'
 import { writeFile } from 'fs/promises'
 import ncp from 'ncp'
 import { promisify } from 'util'
+import { serverSideRender } from './utils/ssr'
 
 const cli = cac('hyperlight')
 
@@ -110,24 +110,34 @@ cli
 
       await promisify(ncp)(options.public, options.output)
 
-      if (pageImport.getServerSideState)
+      if (pageImport.getServerSideState) {
         warning(
           'Server side rendering for each request is not available when exporting, getServerSideState will not be available.'
         )
 
-      const view = pageImport.default
-      const state = {
-        //...pageImport.getServerSideState?.(),
-        ...pageImport.getInitialState?.()
+        warning(`Skipping over: ${page}`)
+        continue
       }
+      // const view = pageImport.default
+      // const state = {
+      //   //...pageImport.getServerSideState?.(),
+      //   ...pageImport.getInitialState?.()
+      // }
 
-      const htmlCode = htmlTemplate(
-        await prodJsTemplate(state, `${pagePath}`),
-        renderToString(view(state)),
-        utils.convertFileExtension(pagePath, '.css')
+      // const htmlCode = htmlTemplate(
+      //   await prodJsTemplate(state, pagePath),
+      //   renderToString(view(state)),
+      //   utils.convertFileExtension(pagePath, '.css')
+      // )
+
+      const ssr = await serverSideRender(
+        { module: pageImport },
+        pagePath,
+        utils.convertFileExtension(pagePath, '.css'),
+        prodJsTemplate
       )
 
-      await writeFile(htmlRenderPath, htmlCode)
+      await writeFile(htmlRenderPath, ssr.html)
     }
   })
 

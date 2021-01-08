@@ -1,6 +1,13 @@
 import { minify } from 'terser'
 
-export const prodJsTemplate = async (state: any, pagePath: string) =>
+interface State {
+  serverSideState: any
+  initialState: any
+}
+export type JsTemplate = (state: State, pagePath: string) => Promise<string>
+type DevTemplateConstructor = (wsHost?: string, wsPort?: number) => JsTemplate
+
+export const prodJsTemplate: JsTemplate = async (state, pagePath) =>
   (
     await minify(`
 import { app } from '/hyperapp.js'
@@ -14,11 +21,9 @@ app({
 `)
   ).code
 
-export const devJsTemplate = (
-  state: any,
-  pagePath: string,
-  wsHost?: string,
-  wsPort?: number
+export const devJsTemplate: DevTemplateConstructor = (wsHost, wsPort) => async (
+  state,
+  pagePath
 ) => `
 import { app } from '/hyperapp.js'
 import view from '${pagePath}'
@@ -27,7 +32,7 @@ import { livereload } from '/livereload.js'
 const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
 
 app({
-  init: savedState ?? ${JSON.stringify(state)},
+  init: { ...savedState, ...${JSON.stringify(state)} },
   view,
   node: document.getElementById('app'),
   middleware

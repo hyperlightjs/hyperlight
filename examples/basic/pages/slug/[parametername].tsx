@@ -1,13 +1,11 @@
 import { Request } from '@tinyhttp/app'
-// eslint-disable-next-line unused-imports/no-unused-imports
 import { jsx } from '@hyperlight/jsx'
+import { Context, ServerSideState } from 'hyperlight'
 
 export default (state: any) => {
-  return <p>Hello {state.param.parametername}</p>
+  return <p>Hello {state.param}</p>
 }
 
-export function getServerSideState(req: Request) {
-  return {
-    param: req.params
-  }
+export function getServerSideState(ctx: Context): ServerSideState {
+  return { state: { param: ctx.params.parametername } }
 }
