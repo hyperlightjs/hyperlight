@@ -5,7 +5,7 @@
     "eslint:recommended",
     "prettier/@typescript-eslint"
   ],
-  "plugins": ["prettier", "unused-imports"],
+  "plugins": ["prettier"],
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module"
@@ -21,16 +21,6 @@
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "unused-imports/no-unused-imports": "error",
-    "unused-imports/no-unused-vars": [
-      "warn",
-      {
-        "vars": "all",
-        "varsIgnorePattern": "^_",
-        "args": "after-used",
-        "argsIgnorePattern": "^_"
-      }
-    ],
     "no-unused-vars": "off",
     "no-console": "off",
     "no-undef": "off"

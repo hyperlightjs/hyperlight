@@ -10,6 +10,7 @@ import chokidar from 'chokidar'
 import * as utils from './utils'
 import serveHandler from 'serve-handler'
 import { error, info } from './logging'
+import type { ParsedUrlQuery } from 'querystring'
 
 export interface HyperlightConfiguration {
   host: string
@@ -326,3 +327,24 @@ export class HyperlightServer {
 
 export const Hyperlight = (config?: Partial<HyperlightConfiguration>) =>
   new HyperlightServer(config)
+
+export interface ServerSideContext {
+  req: Request
+  res: Response
+  query: ParsedUrlQuery
+  params: Record<string, any>
+}
+
+export type ServerSideState = <T>(
+  ctx: ServerSideContext
+) => {
+  state: T
+  notFound: boolean
+  redirect: {
+    permanent: boolean
+    dest: string
+    statusCode: 301 | 302 | 303 | 304 | 307 | 308
+  }
+}
+
+export type { Request, Response }
