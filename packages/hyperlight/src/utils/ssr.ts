@@ -27,6 +27,8 @@ export type InitialStateFunc = () => State
 
 interface PageModule {
   default: (state: State) => any
+  Head: (state: State) => any
+
   getServerSideState: ServerSideStateFunc
   getInitialState: InitialStateFunc
 }
@@ -39,6 +41,7 @@ export const serverSideRender = async (
   ctx?: Context
 ) => {
   const view = serverModule.module.default
+  const head = serverModule.module.Head
 
   const serverSideState = ctx
     ? serverModule.module.getServerSideState?.(ctx) ?? {}
@@ -50,10 +53,13 @@ export const serverSideRender = async (
     throw 'The default export is not a function'
   }
 
+  const state = { ...initialState, ...serverSideState.state }
+
   return {
     html: htmlTemplate(
-      await jsTemplate({ ...initialState, ...serverSideState.state }, pagePath),
-      renderToString(view({ ...initialState, ...serverSideState.state })),
+      await jsTemplate(state, pagePath),
+      renderToString(head(state)),
+      renderToString(view(state)),
       stylesheetPath
     ),
     serverSideState: serverSideState

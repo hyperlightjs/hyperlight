@@ -19,7 +19,16 @@ type State = Partial<{
   test: string
   headers: string
   othertext: string
+  title: string
 }>
+
+export const Head = (state: State) => {
+  return (
+    <>
+      <title>{state.title}</title>
+    </>
+  )
+}
 
 export default (state: State) => {
   return (
@@ -64,6 +73,7 @@ export const getServerSideState: ServerSideStateFunc = (ctx: Context) => {
 
 export const getInitialState = (): State => {
   return {
-    text: 'hello world'
+    text: 'hello world',
+    title: 'Welcome to hyperlight!'
   }
 }

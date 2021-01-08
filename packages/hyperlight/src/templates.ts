@@ -41,6 +41,7 @@ app({
 
 export const htmlTemplate = (
   js: string,
+  head: string,
   preRender: string,
   stylesheet: string
 ) => `
@@ -48,6 +49,7 @@ export const htmlTemplate = (
 <html>
   <head>
     <link rel="stylesheet" href="${stylesheet}">
+    ${head}
   </head>
   <body>
     <main id="app">${preRender}</main>
