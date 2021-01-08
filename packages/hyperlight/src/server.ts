@@ -64,7 +64,7 @@ export class HyperlightServer {
     }
 
     this.app.get('/hyperapp.js', (_, res) => {
-      res.sendFile(path.resolve(`node_modules/hyperapp/hyperapp.js`))
+      res.sendFile(path.resolve(this.hyperappJs))
     })
 
     if (this.config.dev) {
