@@ -10,7 +10,6 @@ import chokidar from 'chokidar'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
 import { error, info } from './utils/logging'
-import type { ParsedUrlQuery } from 'querystring'
 
 export interface HyperlightConfiguration {
   host: string
@@ -83,9 +82,11 @@ export class HyperlightServer {
     res: Response,
     next: NextFunction
   ) {
-    if (err.code !== 404) error(err.message)
-    else if (err.code === 404) res.send('404 Not found')
-    else res.send(err)
+    if (err.code !== 404) {
+      error(err.message)
+      error(err.stack)
+    } else if (err.code === 404) res.send('404 Not found')
+    else res.send(`${err.message}, check the console`)
 
     next?.()
   }
@@ -318,24 +319,3 @@ export class HyperlightServer {
 
 export const Hyperlight = (config?: Partial<HyperlightConfiguration>) =>
   new HyperlightServer(config)
-
-export interface ServerSideContext {
-  req: Request
-  res: Response
-  query: ParsedUrlQuery
-  params: Record<string, any>
-}
-
-export type ServerSideState = <T>(
-  ctx: ServerSideContext
-) => {
-  state: T
-  notFound: boolean
-  redirect: {
-    permanent: boolean
-    dest: string
-    statusCode: 301 | 302 | 303 | 304 | 307 | 308
-  }
-}
-
-export type { Request, Response }
