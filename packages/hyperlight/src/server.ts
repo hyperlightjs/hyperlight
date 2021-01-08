@@ -3,13 +3,13 @@ import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm, mkdir, readFile } from 'fs/promises'
+import { rm as fsRm } from 'fs/promises'
 import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
 import chokidar from 'chokidar'
-import * as utils from './utils'
+import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
-import { error, info } from './logging'
+import { error, info } from './utils/logging'
 import type { ParsedUrlQuery } from 'querystring'
 
 export interface HyperlightConfiguration {
@@ -42,6 +42,7 @@ export class HyperlightServer {
 
   cacheDir: string = path.join(process.cwd(), '.cache')
   bundledDir: string = path.join(this.cacheDir, 'bundled/')
+  depTreeCache: string = path.join(this.cacheDir, 'deptree.json')
   pagesDir: string = path.join(process.cwd(), 'pages/')
   publicDir: string = path.join(process.cwd(), 'public/')
 
@@ -90,11 +91,9 @@ export class HyperlightServer {
   }
 
   async clearCache() {
-    fs.existsSync(this.cacheDir)
-      ? await fsRm(this.cacheDir, { recursive: true, force: true })
-      : ''
-
-    await mkdir(this.cacheDir)
+    await utils.createOrRecreate(this.cacheDir, 'folder')
+    // if (this.config.dev)
+    // await utils.createOrRecreate(this.depTreeCache, 'file', '{}')
   }
 
   async removeFromCache(rmpath: string) {
@@ -115,16 +114,14 @@ export class HyperlightServer {
 
     await this.clearCache() // Clear cache
 
-    chokidar
+    const devWatchHandler = utils.fileWatchDevHandler(this.pagesDir, reloadAll)
+
+    const watcher = chokidar
       .watch('.', { cwd: this.pagesDir, ignored: /^.*\.(css)$/ })
       .on('unlink', (path) => this.removeFromCache(path))
-      .on('add', (filepath) =>
-        bundlePage(path.join(this.pagesDir, filepath), { verbose: true })
+      .on('all', (eventName, filepath) =>
+        devWatchHandler(watcher, eventName, filepath)
       )
-      .on('change', (filepath) => {
-        reloadAll()
-        bundlePage(path.join(this.pagesDir, filepath), { verbose: true })
-      })
 
     this.app.use(async (req, res, next) => {
       const hypotheticalFile = path.join(this.bundledDir, `${req.path}.mjs`)
@@ -286,19 +283,13 @@ export class HyperlightServer {
     const preRender = renderToString(view(state))
 
     const htmlContent = htmlTemplate(
-      prodJsTemplate(state, page.routes.script),
+      await prodJsTemplate(state, page.routes.script),
       preRender,
       page.routes.stylesheet
     )
 
-    await utils.writeFileRecursive(htmlContent, page.outputPaths.html)
-
-    const memoryCache = await readFile(page.outputPaths.html, {
-      encoding: 'utf-8'
-    })
-
     this.app.get(page.routes.base, (_, res) =>
-      res.type('text/html').send(memoryCache)
+      res.type('text/html').send(htmlContent)
     )
   }
 
@@ -312,7 +303,7 @@ export class HyperlightServer {
       const state = { ...initialState, ...serverSideState }
 
       const htmlContent = htmlTemplate(
-        prodJsTemplate(
+        await prodJsTemplate(
           { ...initialState, ...serverSideState },
           page.routes.script
         ),

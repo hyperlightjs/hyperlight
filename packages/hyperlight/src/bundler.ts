@@ -1,7 +1,7 @@
 import esbuild from 'esbuild'
 import path from 'path'
 import { gray } from 'colorette'
-import { error, info } from './logging'
+import { error, info } from './utils/logging'
 
 interface BundlerOptions {
   verbose: boolean
@@ -38,6 +38,7 @@ export async function bundlePage(
       outExtension: {
         '.js': '.mjs'
       },
+      minify: true,
       splitting: true,
       define: {
         NODE_ENV: 'development'
