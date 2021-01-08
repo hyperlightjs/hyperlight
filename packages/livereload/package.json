@@ -1,6 +1,6 @@
 {
   "name": "@hyperlight/livereload",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Live reload for Hyperapp with persisting state.",
   "type": "module",
   "module": "dist/index.js",
