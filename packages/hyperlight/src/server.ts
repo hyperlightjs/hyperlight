@@ -1,15 +1,15 @@
 import { App, NextFunction, Request, Response } from '@tinyhttp/app'
 import { bundlePage } from './bundler'
-import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
 import { rm as fsRm } from 'fs/promises'
-import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
+import { devJsTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
 import chokidar from 'chokidar'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
 import { error, info } from './utils/logging'
+import { serverSideRender } from './utils/ssr'
 
 export interface HyperlightConfiguration {
   host: string
@@ -82,11 +82,14 @@ export class HyperlightServer {
     res: Response,
     next: NextFunction
   ) {
-    if (err.code !== 404) {
+    if (err.code === 404) {
+      res.statusCode = 404
+      res.send('404 Not found')
+    } else {
       error(err.message)
       error(err.stack)
-    } else if (err.code === 404) res.send('404 Not found')
-    else res.send(`${err.message}, check the console`)
+      res.send(err.message)
+    }
 
     next?.()
   }
@@ -163,26 +166,42 @@ export class HyperlightServer {
       const page = await import(
         `${pageModule.modulePath}?random=${randomImport}`
       )
-      const view = page.default
-      const { getInitialState, getServerSideState } = page
-      const state = { ...getInitialState?.(), ...getServerSideState?.(req) }
 
-      const ssr = renderToString(view(state))
+      // const view = page.default
+      // const { getInitialState, getServerSideState } = page
+      // const state = { ...getInitialState?.(), ...getServerSideState?.(req) }
 
-      res
-        .type('text/html')
-        .send(
-          htmlTemplate(
-            devJsTemplate(
-              state,
-              pageModule.moduleImport,
-              this.config.host,
-              this.config.wsPort
-            ),
-            ssr,
-            utils.convertFileExtension(pageModule.moduleImport, '.css')
-          )
-        )
+      // const ssr = renderToString(view(state))
+
+      // res
+      //   .type('text/html')
+      //   .send(
+      //     htmlTemplate(
+      //       devJsTemplate(
+      //         state,
+      //         pageModule.moduleImport,
+      //         this.config.host,
+      //         this.config.wsPort
+      //       ),
+      //       ssr,
+      //       utils.convertFileExtension(pageModule.moduleImport, '.css')
+      //     )
+      //   )
+      const styleSheet = utils.convertFileExtension(
+        pageModule.moduleImport,
+        '.css'
+      )
+      const jsTemplate = devJsTemplate(this.config.host, this.config.wsPort)
+
+      const ssr = await serverSideRender(
+        { module: page },
+        pageModule.moduleImport,
+        styleSheet,
+        jsTemplate,
+        { req, res, params: req.params }
+      )
+
+      res.type('text/html').send(ssr.html)
     })
 
     this.app.get('/livereload.js', (_, res) => {
@@ -279,18 +298,25 @@ export class HyperlightServer {
   }
 
   async useStaticCache(page: HyperlightPage) {
-    const view = page.pageImport.default
-    const state = page.pageImport.getInitialState?.() ?? {}
-    const preRender = renderToString(view(state))
+    // const view = page.pageImport.default
+    // const state = page.pageImport.getInitialState?.() ?? {}
+    // const preRender = renderToString(view(state))
 
-    const htmlContent = htmlTemplate(
-      await prodJsTemplate(state, page.routes.script),
-      preRender,
-      page.routes.stylesheet
+    // const htmlContent = htmlTemplate(
+    //   await prodJsTemplate(state, page.routes.script),
+    //   preRender,
+    //   page.routes.stylesheet
+    // )
+
+    const ssr = await serverSideRender(
+      { module: page.pageImport },
+      page.routes.script,
+      page.routes.stylesheet,
+      prodJsTemplate
     )
 
     this.app.get(page.routes.base, (_, res) =>
-      res.type('text/html').send(htmlContent)
+      res.type('text/html').send(ssr.html)
     )
   }
 
@@ -298,21 +324,29 @@ export class HyperlightServer {
     const initialState = page.pageImport.getInitialState?.() ?? {}
 
     return async (req: Request, res: Response) => {
-      const serverSideState = page.pageImport.getServerSideState(req)
-      const view = page.pageImport.default
+      // const serverSideState = page.pageImport.getServerSideState(req)
+      // const view = page.pageImport.default
 
-      const state = { ...initialState, ...serverSideState }
+      // const state = { ...initialState, ...serverSideState }
 
-      const htmlContent = htmlTemplate(
-        await prodJsTemplate(
-          { ...initialState, ...serverSideState },
-          page.routes.script
-        ),
-        renderToString(view(state)),
-        page.routes.stylesheet
+      // const htmlContent = htmlTemplate(
+      //   await prodJsTemplate(
+      //     { ...initialState, ...serverSideState },
+      //     page.routes.script
+      //   ),
+      //   renderToString(view(state)),
+      //   page.routes.stylesheet
+      // )
+
+      const ssr = await serverSideRender(
+        { module: page.pageImport, initialState },
+        page.routes.script,
+        page.routes.stylesheet,
+        prodJsTemplate,
+        { req, res, params: req.params }
       )
 
-      res.send(htmlContent)
+      res.send(ssr.html)
     }
   }
 }

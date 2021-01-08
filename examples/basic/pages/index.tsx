@@ -1,6 +1,5 @@
-// eslint-disable-next-line unused-imports/no-unused-imports
 import { jsx } from '@hyperlight/jsx'
-import { Request } from '@tinyhttp/app'
+import { Request, Context, ServerSideStateFunc } from 'hyperlight'
 
 import './module.css'
 
@@ -19,6 +18,7 @@ type State = Partial<{
   text: string
   test: string
   headers: string
+  othertext: string
 }>
 
 export default (state: State) => {
@@ -28,6 +28,7 @@ export default (state: State) => {
       <img src="/logo.png" />
       <p>cddd</p>
       <p>{state.text}</p>
+      <p>{state.othertext}</p>
       <p>{state.test}</p>
       <FragmentComponent testProp="Hello component!">
         <p>children1</p>
@@ -43,14 +44,21 @@ export default (state: State) => {
           return { ...state, text: event.target.value }
         }}
       />
+      <input
+        value={state.othertext}
+        oninput={(state: State, event: { target: HTMLInputElement }) => {
+          return { ...state, othertext: event.target.value }
+        }}
+      />
     </section>
   )
 }
 
-export const getServerSideState = (req: Request): State => {
+export const getServerSideState: ServerSideStateFunc = (ctx: Context) => {
   return {
-    test: 'I <3 server side state x2',
-    headers: req.headers['user-agent']
+    state: {
+      headers: ctx.req.headers['user-agent']
+    }
   }
 }
 
