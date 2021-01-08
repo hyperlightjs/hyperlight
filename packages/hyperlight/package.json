@@ -33,6 +33,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/dependency-tree": "^7.2.0",
     "@types/node": "^14.14.20",
     "@types/sane": "^2.0.0",
     "@types/serve-handler": "^6.1.0",
@@ -47,6 +48,7 @@
     "cac": "^6.7.1",
     "chokidar": "github:paulmillr/chokidar",
     "colorette": "^1.2.1",
+    "dependency-tree": "^8.0.0",
     "esbuild": "^0.8.30",
     "hyperapp-render": "^3.5.0",
     "readdirp": "^3.5.0",
