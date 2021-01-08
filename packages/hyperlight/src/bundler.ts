@@ -1,7 +1,7 @@
 import esbuild from 'esbuild'
 import path from 'path'
 import { gray } from 'colorette'
-import { error, info } from './utils/logging'
+import { error, info, warning } from './utils/logging'
 
 interface BundlerOptions {
   verbose: boolean
@@ -50,5 +50,5 @@ export async function bundlePage(
     return
   }
 
-  for (const warning of build.warnings) console.warn(warning)
+  for (const w of build.warnings) warning([w.text, w.location].join('\n'))
 }

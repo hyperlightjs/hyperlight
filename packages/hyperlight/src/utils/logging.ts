@@ -1,15 +1,21 @@
-import { bgCyan, bold, black, bgRed, bgYellow } from 'colorette'
+import { cyan, bold, red, yellow, gray, blue } from 'colorette'
 
-const boldBlack = (text: string) => bold(black(text))
+function msg(message: string) {
+  return `${gray(bold('['))} ${message} ${gray(bold(']'))}`
+}
 
 export function info(message: string) {
-  console.info(`${boldBlack(bgCyan(' INFO '))} ${message}`)
+  console.info(msg(bold(cyan('INFO'))), message)
 }
 
 export function error(message: string) {
-  console.error(`${bgRed(' ERROR ')} ${message}`)
+  console.error(msg(bold(red('ERROR'))), message)
 }
 
 export function warning(message: string) {
-  console.warn(`${boldBlack(bgYellow(' WARN '))} ${message}`)
+  console.error(msg(bold(yellow('WARN'))), message)
+}
+
+export function success(message: string) {
+  console.error(msg(bold(blue('SUCCESS'))), message)
 }

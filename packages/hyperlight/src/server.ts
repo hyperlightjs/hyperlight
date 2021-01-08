@@ -3,13 +3,14 @@ import { bundlePage } from './bundler'
 import { renderToString } from 'hyperapp-render'
 import path from 'path'
 import fs from 'fs'
-import { rm as fsRm } from 'fs/promises'
+import { rm as fsRm, stat } from 'fs/promises'
 import { devJsTemplate, htmlTemplate, prodJsTemplate } from './templates'
 import sirv from 'sirv'
 import chokidar from 'chokidar'
+import table from 'as-table'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
-import { error, info } from './utils/logging'
+import { error, info, success } from './utils/logging'
 
 export interface HyperlightConfiguration {
   host: string
@@ -212,27 +213,50 @@ export class HyperlightServer {
 
     await this.clearCache() // Clear cache folder
 
-    for (const script of pagesDir)
-      bundlePage(path.join(this.pagesDir, script), {
+    info('Creating an optimized production build')
+
+    const buildInfo = []
+
+    for (const script of pagesDir) {
+      // bundle every page
+      await bundlePage(path.join(this.pagesDir, script), {
         outDir: this.bundledDir
-      }) // bundle every page
+      })
+
+      const route = utils.getRouteFromScript(script)
+
+      const pageModulePath = `${path.join(this.bundledDir, route)}`
+
+      const page = await import(`${pageModulePath}.mjs`)
+
+      const size = await utils.getReadableFileSize(`${pageModulePath}.mjs`)
+
+      buildInfo.push({
+        Page: `${page.getServerSideState ? 'λ' : '○'} ${script}`,
+        Size: size
+      })
+    }
+
+    console.log('\n', table(buildInfo))
+
+    // Symbol legenda
+    console.log(`\n○  (Static) - rendered as static HTML`)
+    console.log('λ  (Server) - rendered at runtime')
+    console.log('\n')
+
+    info('Production build completed\n')
+
+    success(`To start the project in production mode run \`hyperlight serve\``)
   }
 
   async prodServe() {
     // Get all the files in the pages directory
     const pagesDir = await utils.scanPages(this.pagesDir)
 
-    // Symbol legenda
-    console.log(`○ - Statically generated`)
-    console.log('λ - Server-side rendered')
-    console.log('\n')
-
     // Bundle all scripts and put them in the cache folder
     // NOTE: this is where the difference between statically generated and server side rendered is made
     for (const script of pagesDir) {
-      const parsedScriptPath = path.parse(script)
-
-      const route = path.join(parsedScriptPath.dir, parsedScriptPath.name)
+      const route = utils.getRouteFromScript(script)
 
       const hyperlightPage: HyperlightPage = {
         script,
@@ -256,10 +280,8 @@ export class HyperlightServer {
 
       if (hyperlightPage.pageImport.getServerSideState) {
         // Differenciate between server side rendered page and statically generated ones
-        console.log(`λ ${hyperlightPage.script}`)
         this.app.get(hyperlightPage.routes.base, this.ssrMw(hyperlightPage))
       } else {
-        console.log(`○ ${hyperlightPage.script}`)
         this.useStaticCache(hyperlightPage)
       }
     }

@@ -46,6 +46,7 @@
   "dependencies": {
     "@hyperlight/livereload": "workspace:*",
     "@tinyhttp/app": "^1.1.5",
+    "as-table": "^1.0.55",
     "cac": "^6.7.1",
     "chokidar": "github:paulmillr/chokidar",
     "colorette": "^1.2.1",

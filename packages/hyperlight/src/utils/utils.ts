@@ -1,5 +1,5 @@
 import { existsSync } from 'fs'
-import { mkdir, writeFile, rm as fsRm } from 'fs/promises'
+import { mkdir, writeFile, rm as fsRm, stat } from 'fs/promises'
 import readdir from 'readdirp'
 import path from 'path'
 import ws from 'ws'
@@ -162,4 +162,22 @@ export const fileWatchDevHandler = (
     bundlePage(originalModulePath, { verbose: true })
     if (eventName === 'change') reloadAll() // Reload browser via websockets
   }
+}
+
+export function getRouteFromScript(script: string): string {
+  const parsedScriptPath = path.parse(script)
+
+  return path.join(parsedScriptPath.dir, parsedScriptPath.name)
+}
+
+export async function getReadableFileSize(filename: string) {
+  const stats = await stat(filename)
+  //console.log('stats', stats);
+  const { size } = stats
+  // convert to human readable format.
+  const i = Math.floor(Math.log(size) / Math.log(1024))
+
+  return `${(size / Math.pow(1024, i)).toFixed(2)} ${
+    ['B', 'KB', 'MB', 'GB', 'TB'][i]
+  }`
 }
