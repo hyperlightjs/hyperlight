@@ -58,7 +58,7 @@ export const serverSideRender = async (
   return {
     html: htmlTemplate(
       await jsTemplate(state, pagePath),
-      renderToString(head(state)),
+      head ? renderToString(head(state)) : '',
       renderToString(view(state)),
       stylesheetPath
     ),
