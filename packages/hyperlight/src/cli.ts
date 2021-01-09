@@ -41,13 +41,15 @@ cli
   .option('--host [host]', 'The IP the server will listen on')
   .option('--port [port]', 'The port the server will listen on')
   .option('--directory [directory]', 'Change the working directory')
+  .option('--disable-cache', 'Disables file caching')
   .action((options) => {
     if (options.directory) process.chdir(options.directory)
 
     Hyperlight({
       host: options.host,
       port: options.port,
-      prodOperation: 'SERVE'
+      prodOperation: 'SERVE',
+      disableProdCache: options.disableCache
     })
   })
 

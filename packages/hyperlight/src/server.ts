@@ -4,20 +4,23 @@ import path from 'path'
 import fs from 'fs'
 import { rm as fsRm } from 'fs/promises'
 import { devJsTemplate, prodJsTemplate } from './templates'
-import sirv from 'sirv'
+import sirv, { Options } from 'sirv'
 import chokidar from 'chokidar'
 import table from 'as-table'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
 import { error, info, success } from './utils/logging'
 import { ServerSideRenderResult, serverSideRender } from './utils/ssr'
+import { eTag } from '@tinyhttp/etag'
+import { generateCacheHeaders } from './utils/cacheManager'
 
 export interface HyperlightConfiguration {
   host: string
   port: number
-  dev: undefined | true
+  dev: true | undefined
   wsPort: number
   prodOperation: 'BUILD' | 'SERVE'
+  disableProdCache: boolean
 }
 
 interface HyperlightPage {
@@ -47,6 +50,8 @@ export class HyperlightServer {
   pagesDir: string = path.join(process.cwd(), 'pages/')
   publicDir: string = path.join(process.cwd(), 'public/')
 
+  cacheSirvSettings?: Options
+
   hyperappJs = 'node_modules/hyperapp/hyperapp.js'
 
   constructor(config?: Partial<HyperlightConfiguration>) {
@@ -55,6 +60,11 @@ export class HyperlightServer {
     this.config.host ??= 'localhost'
     this.config.port ??= 3000
     this.config.wsPort ??= 8030
+    this.config.disableProdCache ??= false
+
+    this.config.disableProdCache
+      ? ''
+      : (this.cacheSirvSettings = { immutable: true, maxAge: 300, etag: true })
 
     this.app = new App({
       onError: this.appErrorHandler
@@ -65,7 +75,9 @@ export class HyperlightServer {
       return
     }
 
+    const etag = eTag(this.hyperappJs)
     this.app.get('/hyperapp.js', (_, res) => {
+      res.set(generateCacheHeaders(etag, 'public', 500))
       res.sendFile(path.resolve(this.hyperappJs))
     })
 
@@ -169,26 +181,6 @@ export class HyperlightServer {
         `${pageModule.modulePath}?random=${randomImport}`
       )
 
-      // const view = page.default
-      // const { getInitialState, getServerSideState } = page
-      // const state = { ...getInitialState?.(), ...getServerSideState?.(req) }
-
-      // const ssr = renderToString(view(state))
-
-      // res
-      //   .type('text/html')
-      //   .send(
-      //     htmlTemplate(
-      //       devJsTemplate(
-      //         state,
-      //         pageModule.moduleImport,
-      //         this.config.host,
-      //         this.config.wsPort
-      //       ),
-      //       ssr,
-      //       utils.convertFileExtension(pageModule.moduleImport, '.css')
-      //     )
-      //   )
       const styleSheet = utils.convertFileExtension(
         pageModule.moduleImport,
         '.css'
@@ -252,7 +244,7 @@ export class HyperlightServer {
       })
 
       const route = utils.getRouteFromScript(script)
-      const pageModulePath = `${path.join(this.bundledDir, route)}`
+      const pageModulePath = `${path.join(this.scriptsDir, route)}`
 
       const page = await import(`${pageModulePath}.mjs`)
       const size = await utils.getReadableFileSize(`${pageModulePath}.mjs`)
@@ -305,15 +297,18 @@ export class HyperlightServer {
 
       if (hyperlightPage.pageImport.getServerSideState) {
         // Differenciate between server side rendered page and statically generated ones
-        this.app.get(hyperlightPage.routes.base, this.ssrMw(hyperlightPage))
+        this.app.get(
+          hyperlightPage.routes.base,
+          this.ssrMw(hyperlightPage, !this.config.disableProdCache)
+        )
       } else {
         this.useStaticCache(hyperlightPage)
       }
     }
 
-    this.app.use('/scripts/', sirv(this.scriptsDir))
+    this.app.use('/scripts/', sirv(this.scriptsDir, this.cacheSirvSettings))
 
-    this.app.use('/', sirv(this.publicDir))
+    this.app.use('/', sirv(this.publicDir, this.cacheSirvSettings))
 
     this.app.listen(
       this.config.port,
@@ -326,16 +321,6 @@ export class HyperlightServer {
   }
 
   async useStaticCache(page: HyperlightPage) {
-    // const view = page.pageImport.default
-    // const state = page.pageImport.getInitialState?.() ?? {}
-    // const preRender = renderToString(view(state))
-
-    // const htmlContent = htmlTemplate(
-    //   await prodJsTemplate(state, page.routes.script),
-    //   preRender,
-    //   page.routes.stylesheet
-    // )
-
     const ssr = await serverSideRender(
       { module: page.pageImport },
       page.routes.script,
@@ -343,29 +328,20 @@ export class HyperlightServer {
       prodJsTemplate
     )
 
-    this.app.get(page.routes.base, (_, res) =>
-      res.type('text/html').send(ssr.html)
-    )
+    const etag = eTag(ssr.html)
+    const cacheHeaders = !this.config.disableProdCache
+      ? generateCacheHeaders(etag, 'public', 500)
+      : {}
+
+    this.app.get(page.routes.base, (_, res) => {
+      res.set(cacheHeaders).send(ssr.html)
+    })
   }
 
-  ssrMw(page: HyperlightPage) {
+  ssrMw(page: HyperlightPage, cache?: boolean) {
     const initialState = page.pageImport.getInitialState?.() ?? {}
 
     return async (req: Request, res: Response) => {
-      // const serverSideState = page.pageImport.getServerSideState(req)
-      // const view = page.pageImport.default
-
-      // const state = { ...initialState, ...serverSideState }
-
-      // const htmlContent = htmlTemplate(
-      //   await prodJsTemplate(
-      //     { ...initialState, ...serverSideState },
-      //     page.routes.script
-      //   ),
-      //   renderToString(view(state)),
-      //   page.routes.stylesheet
-      // )
-
       const ssr = await serverSideRender(
         { module: page.pageImport, initialState },
         page.routes.script,
@@ -373,6 +349,8 @@ export class HyperlightServer {
         prodJsTemplate,
         { req, res, params: req.params }
       )
+
+      if (cache) res.set(generateCacheHeaders(eTag(ssr.html), 'private', 500))
 
       await this.ssrResponseHandler(res, ssr)
     }
