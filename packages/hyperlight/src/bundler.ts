@@ -2,11 +2,32 @@ import esbuild from 'esbuild'
 import path from 'path'
 import { gray } from 'colorette'
 import { error, info, warning } from './utils/logging'
+import { writeFile } from 'fs/promises'
+import * as utils from './utils/utils'
 
 interface BundlerOptions {
   verbose: boolean
   inputDir: string
   outDir: string
+  baseDir: string
+  outputFile: string
+}
+
+const commonSettings: esbuild.BuildOptions = {
+  bundle: true,
+  external: ['@tinyhttp/app'],
+  platform: 'node',
+  jsxFactory: 'jsx.fa',
+  jsxFragment: 'jsx.fr',
+  format: 'esm',
+  minify: true,
+  splitting: true,
+  define: {
+    NODE_ENV: 'development'
+  },
+  outExtension: {
+    '.js': '.mjs'
+  }
 }
 
 export async function bundlePage(
@@ -26,23 +47,11 @@ export async function bundlePage(
 
   try {
     build = await esbuild.build({
+      ...commonSettings,
       entryPoints: [entryPoint],
-      bundle: true,
-      external: ['@tinyhttp/app'],
-      platform: 'node',
-      jsxFactory: 'jsx.fa',
-      jsxFragment: 'jsx.fr',
-      format: 'esm',
       outdir: options.outDir ?? `.cache/bundled`,
-      outbase: 'pages',
-      outExtension: {
-        '.js': '.mjs'
-      },
-      minify: true,
-      splitting: true,
-      define: {
-        NODE_ENV: 'development'
-      }
+      outbase: options.baseDir ?? 'pages/',
+      outfile: options.outputFile
     })
   } catch (e) {
     error('FAILED!\n')
@@ -51,4 +60,21 @@ export async function bundlePage(
   }
 
   for (const w of build.warnings) warning([w.text, w.location].join('\n'))
+}
+
+export async function bundleTSBrowser( // ts stands for tree shaker here btw
+  inputFile: string,
+  options?: Partial<BundlerOptions>
+) {
+  const bundledPath = path.join(options.inputDir, inputFile)
+
+  const treeShaker = utils.convertFileExtension(bundledPath, '.js')
+  await writeFile(treeShaker, `export { default } from '${bundledPath}'`)
+
+  await esbuild.build({
+    ...commonSettings,
+    entryPoints: [treeShaker],
+    outbase: options?.baseDir,
+    outdir: options.outDir
+  })
 }

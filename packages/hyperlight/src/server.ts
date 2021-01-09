@@ -1,5 +1,5 @@
 import { App, NextFunction, Request, Response } from '@tinyhttp/app'
-import { bundlePage } from './bundler'
+import { bundlePage, bundleTSBrowser } from './bundler'
 import path from 'path'
 import fs from 'fs'
 import { rm as fsRm } from 'fs/promises'
@@ -42,6 +42,7 @@ export class HyperlightServer {
 
   cacheDir: string = path.join(process.cwd(), '.cache')
   bundledDir: string = path.join(this.cacheDir, 'bundled/')
+  scriptsDir: string = path.join(this.cacheDir, 'scripts/')
   depTreeCache: string = path.join(this.cacheDir, 'deptree.json')
   pagesDir: string = path.join(process.cwd(), 'pages/')
   publicDir: string = path.join(process.cwd(), 'public/')
@@ -238,16 +239,22 @@ export class HyperlightServer {
 
     for (const script of pagesDir) {
       // bundle every page
-      await bundlePage(path.join(this.pagesDir, script), {
+      await bundlePage(script, {
+        inputDir: this.pagesDir,
+        baseDir: this.pagesDir,
         outDir: this.bundledDir
       })
 
-      const route = utils.getRouteFromScript(script)
+      await bundleTSBrowser(utils.convertFileExtension(script, '.mjs'), {
+        outDir: this.scriptsDir,
+        inputDir: path.join(this.bundledDir),
+        baseDir: path.join(this.bundledDir)
+      })
 
+      const route = utils.getRouteFromScript(script)
       const pageModulePath = `${path.join(this.bundledDir, route)}`
 
       const page = await import(`${pageModulePath}.mjs`)
-
       const size = await utils.getReadableFileSize(`${pageModulePath}.mjs`)
 
       buildInfo.push({
@@ -263,9 +270,8 @@ export class HyperlightServer {
     console.log('λ  (Server) - rendered at runtime')
     console.log('\n')
 
-    info('Production build completed\n')
-
-    success(`To start the project in production mode run \`hyperlight serve\``)
+    success('Production build completed\n')
+    info(`To start the project in production mode run \`hyperlight serve\`\n`)
   }
 
   async prodServe() {
@@ -287,8 +293,8 @@ export class HyperlightServer {
         routes: {
           base: utils.normalizeRoute(route),
           html: `/${route}.html`,
-          script: `/bundled/${route}.mjs`,
-          stylesheet: `/bundled/${route}.css`
+          script: `/scripts/${route}.mjs`,
+          stylesheet: `/scripts/${route}.css`
         }
       }
 
@@ -305,7 +311,7 @@ export class HyperlightServer {
       }
     }
 
-    this.app.use('/bundled/', sirv(this.bundledDir))
+    this.app.use('/scripts/', sirv(this.scriptsDir))
 
     this.app.use('/', sirv(this.publicDir))
 
