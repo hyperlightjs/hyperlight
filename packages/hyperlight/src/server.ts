@@ -10,7 +10,7 @@ import table from 'as-table'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
 import { error, info, success } from './utils/logging'
-import { serverSideRender } from './utils/ssr'
+import { ServerSideRenderResult, serverSideRender } from './utils/ssr'
 
 export interface HyperlightConfiguration {
   host: string
@@ -84,7 +84,7 @@ export class HyperlightServer {
     res: Response,
     next: NextFunction
   ) {
-    if (err.code === 404) {
+    if (err.code === 404 || res.statusCode === 404) {
       res.statusCode = 404
       res.send('404 Not found')
     } else {
@@ -203,7 +203,7 @@ export class HyperlightServer {
         { req, res, params: req.params }
       )
 
-      res.type('text/html').send(ssr.html)
+      await this.ssrResponseHandler(res, ssr)
     })
 
     this.app.get('/livereload.js', (_, res) => {
@@ -374,8 +374,23 @@ export class HyperlightServer {
         { req, res, params: req.params }
       )
 
-      res.send(ssr.html)
+      await this.ssrResponseHandler(res, ssr)
     }
+  }
+
+  async ssrResponseHandler(res: Response, ssr: ServerSideRenderResult) {
+    if (ssr.serverSideState.notFound) {
+      res.statusCode = 404
+      throw 'not found'
+    } else if (ssr.serverSideState.redirect)
+      res
+        .header('Location', ssr.serverSideState.redirect.dest)
+        .status(
+          ssr.serverSideState.redirect.statusCode ??
+            (ssr.serverSideState.redirect.permanent ? 301 : 307)
+        )
+        .end()
+    else res.type('text/html').send(ssr.html)
   }
 }
 

@@ -33,13 +33,18 @@ interface PageModule {
   getInitialState: InitialStateFunc
 }
 
+export interface ServerSideRenderResult {
+  html: string
+  serverSideState: ServerSideState
+}
+
 export const serverSideRender = async (
   serverModule: { module: PageModule; initialState?: State },
   pagePath: string,
   stylesheetPath: string,
   jsTemplate: JsTemplate,
   ctx?: Context
-) => {
+): Promise<ServerSideRenderResult> => {
   const view = serverModule.module.default
   const head = serverModule.module.Head
 
