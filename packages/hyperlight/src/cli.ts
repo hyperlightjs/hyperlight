@@ -1,11 +1,12 @@
 import { Hyperlight } from '.'
 import cac from 'cac'
-import { bundlePage } from './bundler'
+import { bundlePage, bundleTSBrowser } from './bundler'
 import * as utils from './utils/utils'
 import path from 'path'
 import { prodJsTemplate } from './templates'
 import { warning } from './utils/logging'
-import { writeFile } from 'fs/promises'
+import { writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import ncp from 'ncp'
 import { promisify } from 'util'
 import { serverSideRender } from './utils/ssr'
@@ -83,9 +84,13 @@ cli
     const scriptsRoute = 'scripts/'
     const scriptsOutput = path.join(options.output, scriptsRoute)
 
+    const tempDir = path.join(options.output, '.temp')
+
     await utils.createOrRecreate(options.output, 'folder')
     await utils.createOrRecreate(scriptsOutput, 'folder')
     await utils.createOrRecreate(scriptsOutput, 'folder')
+
+    await promisify(ncp)(options.public, options.output)
 
     const pages = await utils.scanPages(options.directory)
     for (const page of pages) {
@@ -102,13 +107,17 @@ cli
 
       await bundlePage(page, {
         verbose: true,
-        outDir: scriptsOutput,
+        outDir: tempDir,
         inputDir: options.directory
       })
 
-      const pageImport = await import(fullPagePath)
+      await bundleTSBrowser(utils.convertFileExtension(page, '.mjs'), {
+        outDir: scriptsOutput,
+        inputDir: tempDir,
+        baseDir: tempDir
+      })
 
-      await promisify(ncp)(options.public, options.output)
+      const pageImport = await import(fullPagePath)
 
       if (pageImport.getServerSideState) {
         warning(
@@ -137,6 +146,10 @@ cli
         prodJsTemplate
       )
 
+      const renderPathParse = path.parse(htmlRenderPath)
+
+      if (!existsSync(renderPathParse.dir))
+        await mkdir(renderPathParse.dir, { recursive: true })
       await writeFile(htmlRenderPath, ssr.html)
     }
   })

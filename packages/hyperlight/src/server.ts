@@ -247,8 +247,8 @@ export class HyperlightServer {
 
       await bundleTSBrowser(utils.convertFileExtension(script, '.mjs'), {
         outDir: this.scriptsDir,
-        inputDir: path.join(this.bundledDir),
-        baseDir: path.join(this.bundledDir)
+        inputDir: this.bundledDir,
+        baseDir: this.bundledDir
       })
 
       const route = utils.getRouteFromScript(script)

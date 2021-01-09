@@ -4,6 +4,9 @@ import { gray } from 'colorette'
 import { error, info, warning } from './utils/logging'
 import { writeFile } from 'fs/promises'
 import * as utils from './utils/utils'
+import { promisify } from 'util'
+import ncp from 'ncp'
+import { existsSync } from 'fs'
 
 interface BundlerOptions {
   verbose: boolean
@@ -69,7 +72,17 @@ export async function bundleTSBrowser( // ts stands for tree shaker here btw
   const bundledPath = path.join(options.inputDir, inputFile)
 
   const treeShaker = utils.convertFileExtension(bundledPath, '.js')
-  await writeFile(treeShaker, `export { default } from '${bundledPath}'`)
+
+  const cssFile = utils.convertFileExtension(bundledPath, '.css')
+  const outCssFile = utils.convertFileExtension(
+    path.join(options.outDir, inputFile),
+    '.css'
+  )
+
+  await writeFile(
+    treeShaker,
+    `export { default } from './${path.parse(inputFile).name}'`
+  )
 
   await esbuild.build({
     ...commonSettings,
@@ -77,4 +90,6 @@ export async function bundleTSBrowser( // ts stands for tree shaker here btw
     outbase: options?.baseDir,
     outdir: options.outDir
   })
+
+  if (existsSync(cssFile)) await promisify(ncp)(cssFile, outCssFile)
 }
