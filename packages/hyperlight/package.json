@@ -20,7 +20,8 @@
     }
   },
   "bin": {
-    "hyperlight": "dist/hyperlight.js"
+    "hyperlight": "dist/hyperlight.js",
+    "hl": "dist/hyperlight.js"
   },
   "keywords": [
     "hyperapp",
