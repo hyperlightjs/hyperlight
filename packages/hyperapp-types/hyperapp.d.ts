@@ -89,7 +89,7 @@ declare module 'hyperapp' {
 
   // ---------------------------------------------------------------------------
 
-  // A virtual DOM node represents an actual DOM element.
+  /** A virtual DOM node represents an actual DOM element. */
   type VDOM<S> = {
     readonly type: string
     readonly props: PropList<S>
@@ -100,7 +100,7 @@ declare module 'hyperapp' {
     memo?: PropList<S>
   }
 
-  // A key can uniquely associate a virtual DOM node with a certain DOM element.
+  /** A key can uniquely associate a virtual DOM node with a certain DOM element. */
   type Key = string | null | undefined
 
   // Actual DOM nodes will be manipulated depending on how property patching goes.

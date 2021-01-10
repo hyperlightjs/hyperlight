@@ -357,7 +357,7 @@ export class HyperlightServer {
     }
   }
 
-  async ssrResponseHandler(res: Response, ssr: ServerSideRenderResult) {
+  async ssrResponseHandler(res: Response, ssr: ServerSideRenderResult<any>) {
     if (ssr.serverSideState.notFound) {
       res.statusCode = 404
       throw 'not found'

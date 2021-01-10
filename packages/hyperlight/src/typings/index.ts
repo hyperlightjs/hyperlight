@@ -1,15 +1,14 @@
 import type { Request, Response } from '@tinyhttp/app'
+import { Middleware, State, Subscription } from 'hyperapp'
 
 export interface Context {
   req: Request
   res: Response
-  params: Record<string, string>
+  params: Record<string, any>
 }
 
-export type State<S = any> = S
-
-export type ServerSideState = Partial<{
-  state: State
+export type ServerSideState<S> = Partial<{
+  state: State<S>
   notFound: boolean
   redirect: {
     permanent: boolean
@@ -18,15 +17,20 @@ export type ServerSideState = Partial<{
   }
 }>
 
-export type ServerSideStateFunc = (ctx: Context) => ServerSideState
+export type ServerSideStateFunc = <S>(ctx: Context) => ServerSideState<S>
 
-export type InitialStateFunc = () => State
+export type InitialStateFunc = <S = any>() => State<S>
 
-export interface ServerSideRenderResult {
+export interface ServerSideRenderResult<S> {
   html: string
-  serverSideState: ServerSideState
+  serverSideState: ServerSideState<S>
 }
 
-export type AppSettingsFunc = (state: State) => AppSettings
+export type AppSettingsFunc<S = any> = (state: State<S>) => AppSettings<S>
 
-export type AppSettings = Partial<{ middleware: any; subscriptions: any }>
+export type AppSettings<S = any> = Partial<{
+  middleware: Middleware<S>
+  subscriptions: Subscription<S>[]
+}>
+
+export type { Request, Response }

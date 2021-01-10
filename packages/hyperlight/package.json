@@ -45,6 +45,7 @@
     "build": "rollup -c"
   },
   "dependencies": {
+    "@hyperlight/hyperapp-types": "workspace:*",
     "@hyperlight/livereload": "workspace:*",
     "@tinyhttp/app": "1.1.8",
     "@tinyhttp/etag": "^1.1.0",
