@@ -5,7 +5,6 @@ export type { Request, Response } from '@tinyhttp/app'
 
 export type {
   Context,
-  State,
   ServerSideState,
   ServerSideStateFunc,
   InitialStateFunc,

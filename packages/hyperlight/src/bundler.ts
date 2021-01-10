@@ -67,7 +67,8 @@ export async function bundlePage(
 
 export async function bundleTSBrowser( // ts stands for tree shaker here btw
   inputFile: string,
-  options?: Partial<BundlerOptions>
+  options?: Partial<BundlerOptions>,
+  extraExports?: string[]
 ) {
   const bundledPath = path.join(options.inputDir, inputFile)
 
@@ -81,7 +82,11 @@ export async function bundleTSBrowser( // ts stands for tree shaker here btw
 
   await writeFile(
     treeShaker,
-    `export { default } from './${path.parse(inputFile).name}'`
+    `
+    export { default,
+       ${extraExports.join(', ')} 
+    } from './${path.parse(inputFile).name}'
+    `
   )
 
   await esbuild.build({

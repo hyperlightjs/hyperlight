@@ -14,7 +14,7 @@ import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
 
 const init = ${JSON.stringify(state)}
-const appSettings = pageModule.appSettings?.(init)
+const appSettings = pageModule.appConfig?.(init)
 
 app({
   init,
@@ -37,7 +37,7 @@ import { livereload } from '/livereload.js'
 const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
 
 const init = { ...savedState, ...${JSON.stringify(state)} }
-const appSettings = pageModule.appSettings?.(init)
+const appSettings = pageModule.appConfig?.(init)
 
 app({
   init,

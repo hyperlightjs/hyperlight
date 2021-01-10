@@ -231,6 +231,8 @@ export class HyperlightServer {
     const buildInfo = []
 
     for (const script of pagesDir) {
+      const route = utils.getRouteFromScript(script)
+
       // bundle every page
       await bundlePage(script, {
         inputDir: this.pagesDir,
@@ -238,13 +240,20 @@ export class HyperlightServer {
         outDir: this.bundledDir
       })
 
-      await bundleTSBrowser(utils.convertFileExtension(script, '.mjs'), {
-        outDir: this.scriptsDir,
-        inputDir: this.bundledDir,
-        baseDir: this.bundledDir
-      })
+      const tempBundle = await import(
+        `${path.join(this.bundledDir, route)}.mjs`
+      )
 
-      const route = utils.getRouteFromScript(script)
+      await bundleTSBrowser(
+        utils.convertFileExtension(script, '.mjs'),
+        {
+          outDir: this.scriptsDir,
+          inputDir: this.bundledDir,
+          baseDir: this.bundledDir
+        },
+        [tempBundle.appConfig ? 'appConfig' : undefined]
+      )
+
       const pageModulePath = `${path.join(this.scriptsDir, route)}`
 
       const page = await import(`${pageModulePath}.mjs`)

@@ -79,9 +79,12 @@ export const getInitialState: InitialStateFunc = () => {
   }
 }
 
-export const appSettings = (state: State): AppSettings => ({
-  middleware: (dispatch: Dispatch<State>) => (state, props) => {
-    console.log(state, props)
-    return dispatch(state, props)
+export const appConfig = (state: State): AppSettings => {
+  console.log('a')
+  return {
+    middleware: (dispatch: Dispatch<State>) => (state, props) => {
+      console.log(state, props)
+      return dispatch(state, props)
+    }
   }
-})
+}
