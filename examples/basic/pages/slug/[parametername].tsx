@@ -9,3 +9,4 @@ export default (state: any) => {
 export function getServerSideState(ctx: Context): ServerSideState {
   return { state: { param: ctx.params.parametername } }
 }
+

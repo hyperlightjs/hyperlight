@@ -11,5 +11,12 @@
     "outDir": "dist",
     "noUnusedLocals": true
   },
-  "exclude": ["node_modules", ".cache", "dist"]
+  "exclude": [
+    "node_modules",
+    ".cache",
+    "dist",
+    "**/dist",
+    "**/.cache",
+    "**/node_modules"
+  ]
 }

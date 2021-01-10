@@ -1,0 +1,13 @@
+{
+  "name": "@hyperlight/hyperapp-types",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Implements hyperapp types for hyperlight",
+  "types": "./hyperapp.d.ts",
+  "keywords": [
+    "hyperlight",
+    "types"
+  ],
+  "author": "Pietro T. <kapakapa197@gmail.com>",
+  "license": "MIT"
+}

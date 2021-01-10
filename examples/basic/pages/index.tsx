@@ -1,5 +1,6 @@
 import { jsx } from '@hyperlight/jsx'
-import { Request, Context, ServerSideStateFunc } from 'hyperlight'
+import { Dispatch } from 'hyperapp'
+import { AppSettings, ServerSideStateFunc, InitialStateFunc } from 'hyperlight'
 
 import './module.css'
 
@@ -63,7 +64,7 @@ export default (state: State) => {
   )
 }
 
-export const getServerSideState: ServerSideStateFunc = (ctx: Context) => {
+export const getServerSideState: ServerSideStateFunc = (ctx) => {
   return {
     state: {
       headers: ctx.req.headers['user-agent']
@@ -71,9 +72,16 @@ export const getServerSideState: ServerSideStateFunc = (ctx: Context) => {
   }
 }
 
-export const getInitialState = (): State => {
+export const getInitialState: InitialStateFunc = () => {
   return {
     text: 'hello world',
     title: 'Welcome to hyperlight!'
   }
 }
+
+export const appSettings = (state: State): AppSettings => ({
+  middleware: (dispatch: Dispatch<State>) => (state, props) => {
+    console.log(state, props)
+    return dispatch(state, props)
+  }
+})

@@ -11,12 +11,17 @@ export const prodJsTemplate: JsTemplate = async (state, pagePath) =>
   (
     await minify(`
 import { app } from '/hyperapp.js'
-import view from '${pagePath}'
+import * as pageModule from '${pagePath}'
+
+const init = ${JSON.stringify(state)}
+const appSettings = pageModule.appSettings?.(init)
 
 app({
-  init: ${JSON.stringify(state)},
-  view,
-  node: document.getElementById('app')
+  init,
+  view: pageModule.default,
+  node: document.getElementById('app'),
+  middleware: appSettings?.middleware,
+  subscriptions: appSettings?.subscriptions
 })
 `)
   ).code
@@ -26,16 +31,20 @@ export const devJsTemplate: DevTemplateConstructor = (wsHost, wsPort) => async (
   pagePath
 ) => `
 import { app } from '/hyperapp.js'
-import view from '${pagePath}'
+import * as pageModule from '${pagePath}'
 
 import { livereload } from '/livereload.js'
 const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
 
+const init = { ...savedState, ...${JSON.stringify(state)} }
+const appSettings = pageModule.appSettings?.(init)
+
 app({
-  init: { ...savedState, ...${JSON.stringify(state)} },
-  view,
+  init,
+  view: pageModule.default,
   node: document.getElementById('app'),
-  middleware
+  middleware: middleware(appSettings?.middleware),
+  subscriptions: appSettings?.subscriptions
 })
 `
 

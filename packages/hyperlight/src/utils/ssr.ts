@@ -1,29 +1,14 @@
 import { renderToString } from 'hyperapp-render'
 import { htmlTemplate } from '../templates'
 import type { JsTemplate } from '../templates'
-import type { Request, Response } from '@tinyhttp/app'
 
-export interface Context {
-  req: Request
-  res: Response
-  params: Record<string, string>
-}
-
-export type State = any
-
-export type ServerSideState = Partial<{
-  state: State
-  notFound: boolean
-  redirect: {
-    permanent: boolean
-    dest: string
-    statusCode?: 301 | 302 | 303 | 304 | 307 | 308
-  }
-}>
-
-export type ServerSideStateFunc = (ctx: Context) => ServerSideState
-
-export type InitialStateFunc = () => State
+import {
+  Context,
+  InitialStateFunc,
+  ServerSideRenderResult,
+  ServerSideStateFunc,
+  State
+} from '../typings'
 
 interface PageModule {
   default: (state: State) => any
@@ -31,11 +16,6 @@ interface PageModule {
 
   getServerSideState: ServerSideStateFunc
   getInitialState: InitialStateFunc
-}
-
-export interface ServerSideRenderResult {
-  html: string
-  serverSideState: ServerSideState
 }
 
 export const serverSideRender = async (

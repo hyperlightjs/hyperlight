@@ -10,9 +10,10 @@ import table from 'as-table'
 import * as utils from './utils/utils'
 import serveHandler from 'serve-handler'
 import { error, info, success } from './utils/logging'
-import { ServerSideRenderResult, serverSideRender } from './utils/ssr'
+import { serverSideRender } from './utils/ssr'
 import { eTag } from '@tinyhttp/etag'
 import { generateCacheHeaders } from './utils/cacheManager'
+import { ServerSideRenderResult } from './typings'
 
 export interface HyperlightConfiguration {
   host: string

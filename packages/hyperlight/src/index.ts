@@ -1,12 +1,14 @@
 export { Hyperlight } from './server'
 export { HyperlightServer } from './server'
 
+export type { Request, Response } from '@tinyhttp/app'
+
 export type {
   Context,
   State,
   ServerSideState,
   ServerSideStateFunc,
-  InitialStateFunc
-} from './utils/ssr'
-
-export type { Request, Response } from '@tinyhttp/app'
+  InitialStateFunc,
+  ServerSideRenderResult,
+  AppSettings
+} from './typings'

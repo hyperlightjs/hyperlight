@@ -1,6 +1,10 @@
 {
   "name": "hyperlight",
   "private": true,
+  "workspaces": [
+    "packages/**",
+    "examples/**"
+  ],
   "engines": {
     "node": ">=12.4"
   },
