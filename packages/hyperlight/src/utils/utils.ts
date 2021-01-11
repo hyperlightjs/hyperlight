@@ -6,6 +6,7 @@ import ws from 'ws'
 import chokidar from 'chokidar'
 import { bundlePage } from '../bundler'
 import depresolver from 'dependency-tree'
+import { loadConfig } from './configLoaders'
 
 type ChokidarEvent = 'unlink' | 'add' | 'addDir' | 'change' | 'unlinkDir'
 
@@ -28,9 +29,9 @@ export async function writeFileRecursive(html: string, writePath: string) {
   writeFile(writePath, html)
 }
 
-export async function scanPages(dir: string) {
+export async function scanPages(dir: string, pageExtensions?: string[]) {
   const dirScan = await readdir.promise(dir, {
-    fileFilter: ['*.ts', '*.tsx']
+    fileFilter: pageExtensions.map((v) => `*${v}`) || ['*.ts', '*.tsx']
   })
 
   return dirScan.map((v) => v.path)
@@ -180,4 +181,13 @@ export async function getReadableFileSize(filename: string) {
   return `${(size / Math.pow(1024, i)).toFixed(2)} ${
     ['B', 'KB', 'MB', 'GB', 'TB'][i]
   }`
+}
+
+export function allowedExtension(
+  filepath: string,
+  allowedExtensions: string[]
+) {
+  const parsed = path.parse(filepath)
+
+  return allowedExtensions.indexOf(parsed.ext) >= 0
 }

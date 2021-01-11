@@ -14,8 +14,9 @@ import { serverSideRender } from './utils/ssr'
 import { eTag } from '@tinyhttp/etag'
 import { generateCacheHeaders } from './utils/cacheManager'
 import { ServerSideRenderResult } from './typings'
+import { loadConfig } from './utils/configLoaders'
 
-export interface HyperlightConfiguration {
+export interface HyperlightCliOptions {
   host: string
   port: number
   dev: true | undefined
@@ -40,7 +41,7 @@ interface HyperlightPage {
 }
 
 export class HyperlightServer {
-  config: Partial<HyperlightConfiguration>
+  options: Partial<HyperlightCliOptions>
 
   app: App
 
@@ -55,15 +56,15 @@ export class HyperlightServer {
 
   hyperappJs = 'node_modules/hyperapp/hyperapp.js'
 
-  constructor(config?: Partial<HyperlightConfiguration>) {
-    this.config = config ?? {}
+  constructor(options?: Partial<HyperlightCliOptions>) {
+    this.options = options ?? {}
 
-    this.config.host ??= 'localhost'
-    this.config.port ??= 3000
-    this.config.wsPort ??= 8030
-    this.config.disableProdCache ??= false
+    this.options.host ??= 'localhost'
+    this.options.port ??= 3000
+    this.options.wsPort ??= 8030
+    this.options.disableProdCache ??= false
 
-    this.config.disableProdCache
+    this.options.disableProdCache
       ? ''
       : (this.cacheSirvSettings = { immutable: true, maxAge: 300, etag: true })
 
@@ -82,9 +83,9 @@ export class HyperlightServer {
       res.sendFile(path.resolve(this.hyperappJs))
     })
 
-    if (this.config.dev) {
+    if (this.options.dev) {
       this.devServer()
-    } else if (this.config.prodOperation === 'BUILD') {
+    } else if (this.options.prodOperation === 'BUILD') {
       this.prodBuild()
     } else {
       this.prodServe()
@@ -126,6 +127,8 @@ export class HyperlightServer {
   }
 
   async devServer() {
+    const config = await loadConfig()
+
     const { reloadAll } = await utils.createLiveServerWs()
     const liveReloadCode = `export ${await (
       await import('@hyperlight/livereload/dist/index.js')
@@ -136,10 +139,19 @@ export class HyperlightServer {
     const devWatchHandler = utils.fileWatchDevHandler(this.pagesDir, reloadAll)
 
     const watcher = chokidar
-      .watch('.', { cwd: this.pagesDir, ignored: /^.*\.(css)$/ })
-      .on('unlink', (path) => this.removeFromCache(path))
+      .watch('.', {
+        cwd: this.pagesDir,
+        followSymlinks: true
+      })
+      .on('unlink', (path) =>
+        utils.allowedExtension(path, config.pageExtensions) // Chokidar does not support file filtering. I had to implement it myself
+          ? this.removeFromCache(path)
+          : ''
+      )
       .on('all', (eventName, filepath) =>
-        devWatchHandler(watcher, eventName, filepath)
+        utils.allowedExtension(filepath, config.pageExtensions)
+          ? devWatchHandler(watcher, eventName, filepath)
+          : ''
       )
 
     this.app.use(async (req, res, next) => {
@@ -186,7 +198,7 @@ export class HyperlightServer {
         pageModule.moduleImport,
         '.css'
       )
-      const jsTemplate = devJsTemplate(this.config.host, this.config.wsPort)
+      const jsTemplate = devJsTemplate(this.options.host, this.options.wsPort)
 
       const ssr = await serverSideRender(
         { module: page },
@@ -212,17 +224,19 @@ export class HyperlightServer {
     )
 
     this.app.listen(
-      this.config.port,
+      this.options.port,
       () =>
         info(
-          `Started on: http://${this.config.host}:${this.config.port}\n\n` // Comunicate that the server is now listening
+          `Started on: http://${this.options.host}:${this.options.port}\n\n` // Comunicate that the server is now listening
         ),
-      this.config.host
+      this.options.host
     )
   }
 
   async prodBuild() {
-    const pagesDir = await utils.scanPages(this.pagesDir)
+    const config = await loadConfig()
+
+    const pagesDir = await utils.scanPages(this.pagesDir, config.pageExtensions)
 
     await this.clearCache() // Clear cache folder
 
@@ -309,7 +323,7 @@ export class HyperlightServer {
         // Differenciate between server side rendered page and statically generated ones
         this.app.get(
           hyperlightPage.routes.base,
-          this.ssrMw(hyperlightPage, !this.config.disableProdCache)
+          this.ssrMw(hyperlightPage, !this.options.disableProdCache)
         )
       } else {
         this.useStaticCache(hyperlightPage)
@@ -321,12 +335,12 @@ export class HyperlightServer {
     this.app.use('/', sirv(this.publicDir, this.cacheSirvSettings))
 
     this.app.listen(
-      this.config.port,
+      this.options.port,
       () =>
         info(
-          `Server is now listening on ${this.config.host}:${this.config.port}`
+          `Server is now listening on ${this.options.host}:${this.options.port}`
         ),
-      this.config.host
+      this.options.host
     )
   }
 
@@ -339,7 +353,7 @@ export class HyperlightServer {
     )
 
     const etag = eTag(ssr.html)
-    const cacheHeaders = !this.config.disableProdCache
+    const cacheHeaders = !this.options.disableProdCache
       ? generateCacheHeaders(etag, 'public', 500)
       : {}
 
@@ -382,5 +396,5 @@ export class HyperlightServer {
   }
 }
 
-export const Hyperlight = (config?: Partial<HyperlightConfiguration>) =>
+export const Hyperlight = (config?: Partial<HyperlightCliOptions>) =>
   new HyperlightServer(config)
