@@ -30,7 +30,7 @@ export async function writeFileRecursive(html: string, writePath: string) {
 
 export async function scanPages(dir: string, pageExtensions?: string[]) {
   const dirScan = await readdir.promise(dir, {
-    fileFilter: pageExtensions.map((v) => `*${v}`) || ['*.ts', '*.tsx']
+    fileFilter: pageExtensions?.map((v) => `*${v}`) || ['*.ts', '*.tsx']
   })
 
   return dirScan.map((v) => v.path)

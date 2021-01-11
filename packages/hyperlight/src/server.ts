@@ -219,9 +219,10 @@ export class HyperlightServer {
       serveHandler(req, res, { public: this.bundledDir })
     )
 
-    this.app.use('/', (req, res) =>
-      serveHandler(req, res, { public: this.publicDir, symlinks: true })
-    )
+    if (fs.existsSync(this.publicDir))
+      this.app.use('/', (req, res) =>
+        serveHandler(req, res, { public: this.publicDir, symlinks: true })
+      )
 
     this.app.listen(
       this.options.port,
@@ -331,7 +332,8 @@ export class HyperlightServer {
 
     this.app.use('/scripts/', sirv(this.scriptsDir, this.cacheSirvSettings))
 
-    this.app.use('/', sirv(this.publicDir, this.cacheSirvSettings))
+    if (fs.existsSync(this.publicDir))
+      this.app.use('/', sirv(this.publicDir, this.cacheSirvSettings))
 
     this.app.listen(
       this.options.port,
