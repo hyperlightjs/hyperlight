@@ -7,6 +7,7 @@ import * as utils from './utils/utils'
 import { promisify } from 'util'
 import ncp from 'ncp'
 import { existsSync } from 'fs'
+import { loadConfig } from './utils/configLoaders'
 
 interface BundlerOptions {
   verbose: boolean
@@ -16,7 +17,9 @@ interface BundlerOptions {
   outputFile: string
 }
 
-const commonSettings: esbuild.BuildOptions = {
+const loadedConfig = await loadConfig()
+
+const commonConfig: esbuild.BuildOptions = loadedConfig.esbuildConfig({
   bundle: true,
   external: ['@tinyhttp/app'],
   platform: 'node',
@@ -31,7 +34,7 @@ const commonSettings: esbuild.BuildOptions = {
   outExtension: {
     '.js': '.mjs'
   }
-}
+})
 
 export async function bundlePage(
   scriptPath: string,
@@ -50,7 +53,7 @@ export async function bundlePage(
 
   try {
     build = await esbuild.build({
-      ...commonSettings,
+      ...commonConfig,
       entryPoints: [entryPoint],
       outdir: options.outDir ?? `.cache/bundled`,
       outbase: options.baseDir ?? 'pages/',
@@ -90,7 +93,7 @@ export async function bundleTSBrowser( // ts stands for tree shaker here btw
   )
 
   await esbuild.build({
-    ...commonSettings,
+    ...commonConfig,
     entryPoints: [treeShaker],
     outbase: options?.baseDir,
     outdir: options.outDir

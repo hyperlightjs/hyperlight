@@ -270,11 +270,10 @@ export class HyperlightServer {
 
       const pageModulePath = `${path.join(this.scriptsDir, route)}`
 
-      const page = await import(`${pageModulePath}.mjs`)
       const size = await utils.getReadableFileSize(`${pageModulePath}.mjs`)
 
       buildInfo.push({
-        Page: `${page.getServerSideState ? 'λ' : '○'} ${script}`,
+        Page: `${tempBundle.getServerSideState ? 'λ' : '○'} ${script}`,
         Size: size
       })
     }

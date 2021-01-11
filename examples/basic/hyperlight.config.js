@@ -1,5 +1,8 @@
-export default function () {
-  return {
-    pageExtensions: ['.ts', '.tsx']
-  }
+export default {
+  pageExtensions: ['.ts', '.tsx'],
+  esbuildConfig: (config) => ({
+    ...config,
+    minify: true,
+    plugins: []
+  })
 }

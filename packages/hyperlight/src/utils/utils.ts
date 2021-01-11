@@ -6,7 +6,6 @@ import ws from 'ws'
 import chokidar from 'chokidar'
 import { bundlePage } from '../bundler'
 import depresolver from 'dependency-tree'
-import { loadConfig } from './configLoaders'
 
 type ChokidarEvent = 'unlink' | 'add' | 'addDir' | 'change' | 'unlinkDir'
 
