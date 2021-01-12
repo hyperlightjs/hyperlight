@@ -1,0 +1,17 @@
+language: node_js
+node_js:
+  - node
+cache:
+  npm: false
+  directories:
+    - "~/.pnpm-store"
+before_install:
+  - curl -L https://unpkg.com/@pnpm/self-installer | node
+  - pnpm config set store-dir ~/.pnpm-store
+install:
+  - pnpm i -r
+
+jobs:
+  include:
+    - stage: build
+      script: pnpm -w build
