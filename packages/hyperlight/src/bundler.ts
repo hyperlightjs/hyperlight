@@ -49,7 +49,7 @@ export async function bundlePage(
   bundleLog(
     gray(`${new Date().toLocaleTimeString('en-US')} - Detected file change`)
   )
-  bundleLog(`Bundling ${entryPoint}\n`)
+  bundleLog(`Bundling ${scriptPath}\n`)
 
   try {
     build = await esbuild.build({

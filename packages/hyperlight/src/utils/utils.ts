@@ -113,15 +113,21 @@ export const fileWatchDevHandler = (
   ) => {
     if (eventName !== 'add' && eventName !== 'change') return
 
-    const originalModulePath = path.join(pagesDir, filepath)
+    const moduleFullPath = path.join(pagesDir, filepath)
+
+    const buildSettings = {
+      verbose: true,
+      inputDir: pagesDir,
+      baseDir: pagesDir
+    }
 
     // gets a flat list of all the dependencies of a file
     const scanDepTree = depresolver
       .toList({
-        filename: originalModulePath,
+        filename: moduleFullPath,
         directory: process.cwd()
       })
-      .filter((v) => v !== originalModulePath)
+      .filter((v) => v !== moduleFullPath)
 
     for (const dependency of scanDepTree) {
       if (!depTree[dependency]) depTree[dependency] = []
@@ -129,7 +135,7 @@ export const fileWatchDevHandler = (
       if (
         // Ignore if a watcher is already present
         depTree[dependency].find(
-          (depWatcher) => depWatcher.file === originalModulePath
+          (depWatcher) => depWatcher.file === moduleFullPath
         )
       ) {
         continue
@@ -137,29 +143,29 @@ export const fileWatchDevHandler = (
 
       // Add a watcher to a dependency and remove it in case of need
       depTree[dependency].push({
-        file: originalModulePath,
+        file: moduleFullPath,
         watcher: chokidar
           .watch(dependency)
           .on('change', async () => {
-            await bundlePage(originalModulePath, { verbose: true })
+            await bundlePage(filepath, buildSettings)
             reloadAll()
           }) // Bundle the main module in case of change
           .on('unlink', () => {
             depTree[dependency] = depTree[dependency].filter(
               ({ file, watcher }) => {
-                if (file !== originalModulePath) {
+                if (file !== moduleFullPath) {
                   watcher.close()
                   return false
                 }
               }
             )
 
-            bundlePage(originalModulePath, { verbose: true }) // bundle stuff on file deletion
+            bundlePage(filepath, buildSettings) // bundle stuff on file deletion
           })
       })
     }
 
-    bundlePage(originalModulePath, { verbose: true })
+    bundlePage(filepath, buildSettings)
     if (eventName === 'change') reloadAll() // Reload browser via websockets
   }
 }
