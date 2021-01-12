@@ -17,18 +17,18 @@ export type ServerSideState<S> = Partial<{
   }
 }>
 
-export type ServerSideStateFunc = <S>(ctx: Context) => ServerSideState<S>
+export type ServerSideStateFunc<S> = (ctx: Context) => ServerSideState<S>
 
-export type InitialStateFunc = <S = any>() => State<S>
+export type InitialStateFunc<S> = () => State<S>
 
 export interface ServerSideRenderResult<S> {
   html: string
   serverSideState: ServerSideState<S>
 }
 
-export type AppSettingsFunc<S = any> = (state: State<S>) => AppSettings<S>
+export type AppSettingsFunc<S> = (state: State<S>) => AppSettings<S>
 
-export type AppSettings<S = any> = Partial<{
+export type AppSettings<S> = Partial<{
   middleware: Middleware<S>
   subscriptions: Subscription<S>[]
 }>

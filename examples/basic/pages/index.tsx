@@ -1,29 +1,14 @@
 import { jsx } from '@hyperlight/jsx'
-import { Dispatch } from 'hyperapp'
-import { AppSettings, ServerSideStateFunc, InitialStateFunc } from 'hyperlight'
+import { InitialStateFunc } from 'hyperlight'
 
 import './module.css'
 
-function FragmentComponent(props: Record<string, any>, children: any[]) {
-  return (
-    <>
-      <p>Custom component</p>
-      <p>With fragment</p>
-      <p>Property: {props.testProp}</p>
-      <p>Children: {...children}</p>
-    </>
-  )
+interface PageState {
+  title: string
+  text: string
 }
 
-type State = Partial<{
-  text: string
-  test: string
-  headers: string
-  othertext: string
-  title: string
-}>
-
-export const Head = (state: State) => {
+export const Head = (state: PageState) => {
   return (
     <>
       <title>{state.title}</title>
@@ -31,60 +16,26 @@ export const Head = (state: State) => {
   )
 }
 
-export default (state: State) => {
+export default (state: PageState) => {
   return (
     <section>
       <p className="text">Hello world</p>
       <img src="/logo.png" />
-      <p>cddd</p>
       <p>{state.text}</p>
-      <p>{state.othertext}</p>
-      <p>{state.test}</p>
-      <FragmentComponent testProp="Hello component!">
-        <p>children1</p>
-        <p>children2</p>
-      </FragmentComponent>
-      <p>
-        Server side prop {'=>'} {state.headers}
-      </p>
 
       <input
         value={state.text}
-        oninput={(state: State, event: { target: HTMLInputElement }) => {
+        oninput={(state: PageState, event: { target: HTMLInputElement }) => {
           return { ...state, text: event.target.value }
-        }}
-      />
-      <input
-        value={state.othertext}
-        oninput={(state: State, event: { target: HTMLInputElement }) => {
-          return { ...state, othertext: event.target.value }
         }}
       />
     </section>
   )
 }
 
-export const getServerSideState: ServerSideStateFunc = (ctx) => {
+export const getInitialState: InitialStateFunc<PageState> = () => {
   return {
-    state: {
-      headers: ctx.req.headers['user-agent']
-    }
-  }
-}
-
-export const getInitialState: InitialStateFunc = () => {
-  return {
-    text: 'hello world',
+    text: 'Edit me!',
     title: 'Welcome to hyperlight!'
-  }
-}
-
-export const appConfig = (state: State): AppSettings => {
-  console.log('a')
-  return {
-    middleware: (dispatch: Dispatch<State>) => (state, props) => {
-      console.log(state, props)
-      return dispatch(state, props)
-    }
   }
 }
