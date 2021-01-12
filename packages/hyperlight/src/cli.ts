@@ -76,8 +76,8 @@ cli
 cli
   .command('export', 'Statically exports a file in html, css and js files')
   .option('--directory [directory]', 'Change the working directory')
-  .option('--output [dir]', 'Output directory')
-  .option('--public', 'Specify the public assets folder')
+  .option('--output [directory]', 'Output directory')
+  .option('--public [directory]', 'Specify the public assets folder')
   .action(async (options) => {
     options.directory ??= 'pages/'
     options.output ??= 'dist/'
