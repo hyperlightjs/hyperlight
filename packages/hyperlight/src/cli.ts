@@ -77,11 +77,11 @@ cli
   .command('export', 'Statically exports a file in html, css and js files')
   .option('--directory [directory]', 'Change the working directory')
   .option('--output [directory]', 'Output directory')
-  .option('--public [directory]', 'Specify the public assets folder')
   .action(async (options) => {
     options.directory ??= 'pages/'
     options.output ??= 'dist/'
-    options.public ??= 'public/'
+
+    const publicDir = 'public/'
 
     const scriptsRoute = 'scripts/'
     const scriptsOutput = path.join(options.output, scriptsRoute)
@@ -92,7 +92,7 @@ cli
     await utils.createOrRecreate(scriptsOutput, 'folder')
     await utils.createOrRecreate(scriptsOutput, 'folder')
 
-    await promisify(ncp)(options.public, options.output)
+    await promisify(ncp)(publicDir, options.output)
 
     const pages = await utils.scanPages(options.directory)
     for (const page of pages) {
