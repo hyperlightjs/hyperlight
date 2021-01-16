@@ -3,7 +3,7 @@
   <br /><br />
   <a href="https://npmjs.org/package/hyperlight"><img src="https://img.shields.io/npm/dt/hyperlight?color=%234AB8F2&style=for-the-badge" alt="Downloads" /> </a>
   <a href="https://npmjs.org/package/hyperlight"><img alt="npm" src="https://img.shields.io/npm/v/hyperlight?color=%234AB8F2&style=for-the-badge" /></a>
-  <a href="https://travis-ci.com/github/BRA1L0R/hyperlight"><img src="https://img.shields.io/travis/com/BRA1L0R/hyperlight?color=4AB8F2&logo=TRAVIS&style=for-the-badge" /></a>
+  <a href="https://travis-ci.com/github/hyperlightjs/hyperlight"><img src="https://img.shields.io/travis/com/hyperlightjs/hyperlight?color=4AB8F2&logo=TRAVIS&style=for-the-badge" /></a>
   <img src="https://img.shields.io/npm/l/hyperlight?style=for-the-badge&color=%234AB8F2" alt="license" />
 </p>
 
