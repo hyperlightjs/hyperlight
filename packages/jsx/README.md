@@ -1,6 +1,6 @@
 # @hyperlight/jsx
 
-[![npm (scoped)][npm-badge]](https://npmjs.com/package/@tinyhttp/req) [![npm][dl-badge]](https://npmjs.com/package/@tinyhttp/req)
+[![npm (scoped)][npm-badge]](https://npmjs.com/package/@hyperlight/jsx) [![npm][dl-badge]](https://npmjs.com/package/@hyperlight/jsx)
 
 JSX support for [Hyperapp](https://github.com/jorgebucaran/hyperapp).
 
