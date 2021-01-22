@@ -20,5 +20,6 @@
   },
   "devDependencies": {
     "@tinyhttp/app": "^1.1.5"
-  }
+  },
+  "version": null
 }
