@@ -20,7 +20,7 @@
       "import": "./dist/index.js"
     },
     "./jsx-runtime": {
-      "import": "./dist/jsxRuntime.js"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json",
     "./": "./"
