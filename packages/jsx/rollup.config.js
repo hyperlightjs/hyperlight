@@ -1,10 +1,5 @@
 import typescript from '@rollup/plugin-typescript'
 
-const common = {
-  plugins: [typescript({ include: ['./src/**/*.ts'] })],
-  external: ['hyperapp']
-}
-
 export default [
   {
     input: 'src/index.ts',
@@ -14,16 +9,7 @@ export default [
         format: 'esm'
       }
     ],
-    ...common
-  },
-  {
-    input: 'src/jsxRuntime.ts',
-    output: [
-      {
-        file: 'dist/jsxRuntime.js',
-        format: 'esm'
-      }
-    ],
-    ...common
+    plugins: [typescript({ include: ['./src/**/*.ts'] })],
+    external: ['hyperapp']
   }
 ]

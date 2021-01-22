@@ -15,4 +15,7 @@ const jsxify = (h: any) => (type: any, props: any, ...children: any[]) => {
     ? type(props, children)
     : h(type, props || {}, p(children))
 }
-export const jsx = { fa: jsxify(h), fr: fragment } /** @jsx jsx.jsx */
+
+const jsx = { fa: jsxify(h), fr: fragment } /** @jsx jsx.jsx */
+
+export { jsx, jsx as jsxs, jsx as jsxDEV, fragment as Fragment }
