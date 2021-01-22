@@ -1,103 +1,71 @@
 import esbuild from 'esbuild'
 import path from 'path'
-import { gray } from 'colorette'
-import { error, info, warning } from './utils/logging'
-import { writeFile } from 'fs/promises'
-import * as utils from './utils/utils'
-import { promisify } from 'util'
-import ncp from 'ncp'
-import { existsSync } from 'fs'
-import { loadConfig } from './utils/configLoaders'
+import { writeFile, mkdir } from 'fs/promises'
+import { existsSync as exists } from 'fs'
+import { convertFileExtension } from './utils/fileutils'
 
 interface BundlerOptions {
-  verbose: boolean
-  inputDir: string
-  outDir: string
-  baseDir: string
-  outputFile: string
+  fullEntryPath: string
+  relativeEntryPath: string
+  base?: string
+  outfile: string
 }
 
-const loadedConfig = await loadConfig()
-
-const commonConfig: esbuild.BuildOptions = loadedConfig.esbuildConfig({
+const common: esbuild.BuildOptions = {
   bundle: true,
-  external: ['@tinyhttp/app'],
-  platform: 'node',
   jsxFactory: 'jsx.fa',
   jsxFragment: 'jsx.fr',
   format: 'esm',
   minify: true,
-  splitting: true,
   define: {
     NODE_ENV: 'development'
-  },
-  outExtension: {
-    '.js': '.mjs'
   }
-})
-
-export async function bundlePage(
-  scriptPath: string,
-  options?: Partial<BundlerOptions>
-) {
-  let build: esbuild.BuildResult
-  const entryPoint = path.join(options?.inputDir ?? '', scriptPath)
-
-  const bundleLog = (message: string) =>
-    options?.verbose ? info(message) : false
-
-  bundleLog(
-    gray(`${new Date().toLocaleTimeString('en-US')} - Detected file change`)
-  )
-  bundleLog(`Bundling ${scriptPath}\n`)
-
-  try {
-    build = await esbuild.build({
-      ...commonConfig,
-      entryPoints: [entryPoint],
-      outdir: options.outDir ?? `.cache/bundled`,
-      outbase: options.baseDir ?? 'pages/',
-      outfile: options.outputFile
-    })
-  } catch (e) {
-    error('FAILED!\n')
-    error(e.message)
-    return
-  }
-
-  for (const w of build.warnings) warning([w.text, w.location].join('\n'))
 }
 
-export async function bundleTSBrowser( // ts stands for tree shaker here btw
-  inputFile: string,
-  options?: Partial<BundlerOptions>,
-  extraExports?: string[]
-) {
-  const bundledPath = path.join(options.inputDir, inputFile)
+export async function serverBundling({ ...options }: BundlerOptions) {
+  let build: esbuild.BuildResult
+  try {
+    build = await esbuild.build({
+      ...common,
+      banner: `const require=(await import('module')).createRequire(import.meta.url);`,
+      entryPoints: [options.fullEntryPath],
+      outbase: options.base,
+      outfile: options.outfile
+    })
+  } catch (e) {
+    console.error(e)
+  }
 
-  const treeShaker = utils.convertFileExtension(bundledPath, '.js')
+  for (const warning of build.warnings) console.error(warning)
+}
 
-  const cssFile = utils.convertFileExtension(bundledPath, '.css')
-  const outCssFile = utils.convertFileExtension(
-    path.join(options.outDir, inputFile),
-    '.css'
+export async function clientBundling({ ...options }: BundlerOptions) {
+  // writeFile()
+
+  const treeShake = path.join(
+    '.cache/treeshake/',
+    convertFileExtension(options.relativeEntryPath, '.treeshake.ts')
   )
 
-  await writeFile(
-    treeShaker,
-    `
-    export { default,
-       ${extraExports.join(', ')} 
-    } from './${path.parse(inputFile).name}'
-    `
-  )
+  if (!exists(treeShake)) {
+    await mkdir(path.parse(treeShake).dir, { recursive: true })
+    await writeFile(
+      treeShake,
+      `
+        export { default } from '${path.resolve(options.fullEntryPath)}'
+      `
+    )
+  }
 
-  await esbuild.build({
-    ...commonConfig,
-    entryPoints: [treeShaker],
-    outbase: options?.baseDir,
-    outdir: options.outDir
-  })
-
-  if (existsSync(cssFile)) await promisify(ncp)(cssFile, outCssFile)
+  let build: esbuild.BuildResult
+  try {
+    build = await esbuild.build({
+      ...common,
+      entryPoints: [treeShake],
+      outbase: options.base,
+      outfile: options.outfile
+    })
+  } catch (e) {
+    console.error(e)
+  }
 }

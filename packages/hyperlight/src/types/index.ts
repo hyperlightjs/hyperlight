@@ -1,5 +1,5 @@
 import type { Request, Response } from '@tinyhttp/app'
-import { Middleware, State, Subscription } from 'hyperapp'
+import { Middleware, State, Subscription, VDOM } from 'hyperapp'
 
 export interface Context {
   req: Request
@@ -8,7 +8,7 @@ export interface Context {
 }
 
 export type ServerSideState<S> = Partial<{
-  state: State<S>
+  state: Partial<State<S>>
   notFound: boolean
   redirect: {
     permanent: boolean
@@ -19,7 +19,7 @@ export type ServerSideState<S> = Partial<{
 
 export type ServerSideStateFunc<S> = (ctx: Context) => ServerSideState<S>
 
-export type InitialStateFunc<S> = () => State<S>
+export type InitialStateFunc<S> = () => Partial<State<S>>
 
 export interface ServerSideRenderResult<S> {
   html: string
@@ -32,5 +32,12 @@ export type AppSettings<S> = Partial<{
   middleware: Middleware<S>
   subscriptions: Subscription<S>[]
 }>
+
+export interface Page<S = any> {
+  default: (state: State<S>) => VDOM<S>
+  Head: (state: State<S>) => VDOM<S>
+  getServerSideState?: ServerSideStateFunc<S>
+  getInitialState?: InitialStateFunc<S>
+}
 
 export type { Request, Response }

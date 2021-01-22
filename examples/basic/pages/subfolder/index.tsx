@@ -1,7 +1,9 @@
 import { jsx } from '@hyperlight/jsx'
 import { InitialStateFunc } from 'hyperlight'
-
-import './module.css'
+import {
+  Page,
+  ServerSideStateFunc
+} from '../../../../packages/hyperlight/src/types'
 
 interface PageState {
   title: string
@@ -37,5 +39,13 @@ export const getInitialState: InitialStateFunc<PageState> = () => {
   return {
     text: 'Edit me!',
     title: 'Welcome to hyperlight!'
+  }
+}
+
+export const getServerSideState: ServerSideStateFunc<PageState> = (ctx) => {
+  return {
+    state: {
+      text: 'Server side gen'
+    }
   }
 }

@@ -4,18 +4,20 @@ interface State {
   serverSideState: any
   initialState: any
 }
+
 export type JsTemplate = (state: State, pagePath: string) => Promise<string>
-type DevTemplateConstructor = (wsHost?: string, wsPort?: number) => JsTemplate
+export type DevTemplateConstructor = (
+  wsHost?: string,
+  wsPort?: number
+) => JsTemplate
 
 export const prodJsTemplate: JsTemplate = async (state, pagePath) =>
   (
     await minify(`
 import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
-
 const init = ${JSON.stringify(state)}
 const appSettings = pageModule.appConfig?.(init)
-
 app({
   init,
   view: pageModule.default,
@@ -32,13 +34,10 @@ export const devJsTemplate: DevTemplateConstructor = (wsHost, wsPort) => async (
 ) => `
 import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
-
 import { livereload } from '/livereload.js'
 const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
-
 const init = { ...savedState, ...${JSON.stringify(state)} }
 const appSettings = pageModule.appConfig?.(init)
-
 app({
   init,
   view: pageModule.default,
