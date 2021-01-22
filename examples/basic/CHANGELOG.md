@@ -5,6 +5,13 @@
 ### Patch Changes
 
 - Updated dependencies [undefined]
+  - @hyperlight/jsx@0.0.12
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [undefined]
   - @hyperlight/jsx@0.0.11
 
 ## null
