@@ -6,30 +6,31 @@ import {
   Context,
   InitialStateFunc,
   ServerSideRenderResult,
-  ServerSideStateFunc,
-  State
+  ServerSideStateFunc
 } from '../typings'
 
-interface PageModule {
-  default: (state: State) => any
-  Head: (state: State) => any
+import { State } from 'hyperapp'
 
-  getServerSideState: ServerSideStateFunc
-  getInitialState: InitialStateFunc
+interface PageModule {
+  default: (state: State<any>) => any
+  Head: (state: State<any>) => any
+
+  getServerSideState: ServerSideStateFunc<any>
+  getInitialState: InitialStateFunc<any>
 }
 
 export const serverSideRender = async (
-  serverModule: { module: PageModule; initialState?: State },
+  serverModule: { module: PageModule; initialState?: State<any> },
   pagePath: string,
   stylesheetPath: string,
   jsTemplate: JsTemplate,
   ctx?: Context
-): Promise<ServerSideRenderResult> => {
+): Promise<ServerSideRenderResult<any>> => {
   const view = serverModule.module.default
   const head = serverModule.module.Head
 
   const serverSideState = ctx
-    ? serverModule.module.getServerSideState?.(ctx) ?? {}
+    ? (await serverModule.module.getServerSideState?.(ctx)) ?? {}
     : {}
   const initialState =
     serverModule.initialState ?? serverModule.module.getInitialState?.() ?? {}
