@@ -8,7 +8,7 @@ const p = (c: any[]) =>
       typeof any === 'string' || typeof any === 'number' ? text(any) : any
     )
 
-const fragment = (_props: any, children: any[]) => children
+export const fragment = (_props: any, children: any[]) => children
 
 const jsxify = (h: any) => (type: any, props: any, ...children: any[]) => {
   return typeof type === 'function'

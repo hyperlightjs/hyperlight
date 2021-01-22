@@ -13,7 +13,17 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c ../../rollup.config.js"
+    "build": "rollup -c"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    },
+    "./jsx-runtime": {
+      "import": "./dist/jsxRuntime.js"
+    },
+    "./package.json": "./package.json",
+    "./": "./"
   },
   "author": "",
   "dependencies": {
