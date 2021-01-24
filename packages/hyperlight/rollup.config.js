@@ -9,17 +9,17 @@ const external = Object.keys(dependencies).concat(
 )
 
 export default [
-  // {
-  //   ...common,
-  //   input: 'src/index.ts',
-  //   output: [
-  //     {
-  //       dir: 'dist',
-  //       format: 'esm'
-  //     }
-  //   ],
-  //   external
-  // },
+  {
+    ...common,
+    input: 'src/types/index.ts',
+    output: [
+      {
+        dir: 'dist',
+        format: 'esm'
+      }
+    ],
+    external
+  },
   {
     ...common,
     input: 'src/cli.ts',

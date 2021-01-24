@@ -17,9 +17,13 @@ export type ServerSideState<S> = Partial<{
   }
 }>
 
-export type ServerSideStateFunc<S> = (ctx: Context) => ServerSideState<S>
+export type ServerSideStateFunc<S> = (
+  ctx: Context
+) => ServerSideState<S> | Promise<ServerSideState<S>>
 
-export type InitialStateFunc<S> = () => Partial<State<S>>
+export type InitialStateFunc<S> = () =>
+  | Promise<Partial<State<S>>>
+  | Partial<State<S>>
 
 export interface ServerSideRenderResult<S> {
   html: string
@@ -33,7 +37,7 @@ export type AppSettings<S> = Partial<{
   subscriptions: Subscription<S>[]
 }>
 
-export interface Page<S = any> {
+export interface PageExports<S = any> {
   default: (state: State<S>) => VDOM<S>
   Head: (state: State<S>) => VDOM<S>
   getServerSideState?: ServerSideStateFunc<S>

@@ -1,11 +1,6 @@
 import { minify } from 'terser'
 
-interface State {
-  serverSideState: any
-  initialState: any
-}
-
-export type JsTemplate = (state: State, pagePath: string) => Promise<string>
+export type JsTemplate = (state: any, pagePath: string) => Promise<string>
 export type DevTemplateConstructor = (
   wsHost?: string,
   wsPort?: number
@@ -18,6 +13,7 @@ import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
 const init = ${JSON.stringify(state)}
 const appSettings = pageModule.appConfig?.(init)
+
 app({
   init,
   view: pageModule.default,

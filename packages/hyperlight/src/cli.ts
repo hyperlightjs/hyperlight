@@ -1,5 +1,6 @@
 import cac from 'cac'
 import { HyperlightBuilder } from './builder'
+import { HyperlightServer } from './server'
 
 const cli = cac('hyperlight')
 
@@ -23,7 +24,13 @@ cli
   .option('--disable-cache', 'Disables file caching')
   .action((directory, options) => {
     if (directory) process.chdir(directory)
-    /* MUST REWRITE */
+
+    const host = options.host ?? '127.0.0.1'
+    const port = options.port ?? 3000
+
+    const server = new HyperlightServer({ host, port })
+
+    server.productionServer()
   })
 
 cli.parse()

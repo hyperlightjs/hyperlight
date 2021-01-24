@@ -46,5 +46,8 @@
       "pre-commit": "pnpm format && pnpm lint && pnpm build",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "dependencies": {
+    "hyperapp": "2.0.8"
   }
 }

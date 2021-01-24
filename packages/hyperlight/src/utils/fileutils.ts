@@ -1,4 +1,7 @@
 import { rm, stat } from 'fs/promises'
+import { existsSync } from 'fs'
+import { error } from './logging'
+import { bold } from 'colorette'
 
 export function convertFileExtension(file: string, newExtension: string) {
   const pos = file.lastIndexOf('.')
@@ -19,4 +22,26 @@ export async function getReadableFileSize(filename: string) {
   return `${(size / Math.pow(1024, i)).toFixed(2)} ${
     ['B', 'KB', 'MB', 'GB', 'TB'][i]
   }`
+}
+
+export async function normalizeRoute(route: string): Promise<string> {
+  route = `/${route}`
+
+  route = route.replaceAll(
+    /\[(.+)\]/g,
+    (_: string, match: string) => `:${match}`
+  )
+
+  route = route.replace(/([a-z\d]+)(\/*|)$/, (_: string, match: string) =>
+    match == 'index' ? '' : match
+  )
+
+  return route
+}
+
+export function checkPeer(name: string) {
+  if (!existsSync(`node_modules/${name}`)) {
+    error(`Peer dependency ${bold(name)} not met`)
+    process.exit(1)
+  }
 }

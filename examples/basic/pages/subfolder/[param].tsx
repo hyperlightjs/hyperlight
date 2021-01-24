@@ -1,27 +1,26 @@
 import { jsx } from '@hyperlight/jsx'
-import { InitialStateFunc } from 'hyperlight'
-import fs from 'fs'
-
-import './module.css'
+import { Context } from 'hyperlight'
 
 interface PageState {
   title: string
   text: string
+  slug: string
 }
 
-export const Head = (state: PageState) => {
-  return (
-    <>
-      <title>{state.title}</title>
-    </>
-  )
-}
+// export const Head = (state: PageState) => {
+//   return (
+//     <>
+//       <title>{state.title}</title>
+//     </>
+//   )
+// }
 
 export default (state: PageState) => {
   return (
     <section>
       <p className="text">Hello world</p>
       <p>{state.text}</p>
+      <p>{state.slug}</p>
 
       <input
         value={state.text}
@@ -33,9 +32,16 @@ export default (state: PageState) => {
   )
 }
 
-export const getInitialState: InitialStateFunc<PageState> = () => {
+export function getInitialState() {
   return {
-    text: fs.readFileSync('pages/module.css', 'utf-8'),
-    title: 'Welcome to hyperlight!'
+    text: 'Edit me!'
+  }
+}
+
+export function getServerSideState(ctx: Context) {
+  return {
+    state: {
+      slug: ctx.params.param
+    }
   }
 }

@@ -1,9 +1,18 @@
-import { Page } from '../types'
+import { PageExports, Request, Response } from '../types'
 import { join } from 'path'
+import { Handler } from '@tinyhttp/app'
+import { htmlTemplate, JsTemplate } from '../templates'
+import { renderToString } from 'hyperapp-render'
 
 export interface ParsedBundle {
-  import: Page
+  import: PageExports
   type: 'SSR' | 'SSG'
+}
+
+export interface HyperlightPage {
+  route: string
+  file: string
+  module: ParsedBundle
 }
 
 export async function parseBundle(
@@ -12,14 +21,54 @@ export async function parseBundle(
 ): Promise<ParsedBundle> {
   bundlePath = join(process.cwd(), bundlePath)
 
-  const page: Page = await import(
+  const page: PageExports = await import(
     preventCaching
       ? `${bundlePath}?r=${Math.floor(Math.random() * 10000)}`
       : bundlePath
   )
 
   return {
-    type: page.getServerSideState ? 'SSG' : 'SSG',
+    type: typeof page.getServerSideState == 'function' ? 'SSR' : 'SSG',
     import: page
   }
+}
+
+export const serverSideHandler = (
+  page: HyperlightPage,
+  initialState: any,
+  notFound: Handler,
+  jsTemplate: JsTemplate
+) => async (req: Request, res: Response) => {
+  const serverState = await page.module.import.getServerSideState?.({
+    req,
+    res,
+    params: req.params
+  })
+
+  const state = { ...initialState, ...serverState.state }
+
+  const head = page.module.import.Head
+  const view = page.module.import.default
+
+  if (serverState.notFound) return await notFound(req, res)
+
+  if (serverState.redirect) {
+    const redirect = serverState.redirect
+
+    redirect.statusCode ??= redirect.permanent ? 301 : 307
+
+    res.status(redirect.statusCode).header('Location', redirect.dest).end()
+    return
+  }
+
+  console.log(renderToString(view, state))
+
+  res.send(
+    htmlTemplate(
+      await jsTemplate(state, page.file),
+      renderToString(head?.(state)),
+      renderToString(view(state)),
+      ''
+    )
+  )
 }

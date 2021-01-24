@@ -9,5 +9,8 @@
     "types"
   ],
   "author": "Pietro T. <kapakapa197@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "hyperapp": "2.0.8"
+  }
 }
