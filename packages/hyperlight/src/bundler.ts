@@ -1,10 +1,8 @@
 import esbuild from 'esbuild'
 import path from 'path'
-import { writeFile, mkdir, readFile } from 'fs/promises'
+import { writeFile, mkdir, rename, rm } from 'fs/promises'
 import { existsSync as exists } from 'fs'
 import { convertFileExtension } from './utils/fileutils'
-import { minify } from 'terser'
-import readdir from 'readdirp'
 
 interface BundlerOptions {
   fullEntryPath: string
@@ -66,6 +64,7 @@ export async function clientBundling({ ...options }: BundlerOptions) {
     build = await esbuild.build({
       ...common,
       entryPoints: [treeShake],
+      plugins: [ignorePlugin],
       platform: 'node',
       outbase: options.base,
       outfile: options.outfile
@@ -73,16 +72,18 @@ export async function clientBundling({ ...options }: BundlerOptions) {
   } catch (e) {
     console.error(e)
   }
+}
 
-  console.time('minification')
-  await writeFile(
-    treeShake,
-    (
-      await minify(await readFile(options.outfile, 'utf-8'), {
-        compress: true,
-        toplevel: true
-      })
-    ).code
-  )
-  console.timeEnd('minification')
+const ignorePlugin = {
+  name: 'ignoreplugin',
+  setup(build) {
+    build.onResolve({ filter: /fs$/ }, (args) => ({
+      path: args.path,
+      namespace: 'ignoreplugin'
+    }))
+    build.onLoad({ filter: /.+/, namespace: 'ignoreplugin' }, () => ({
+      contents: 'export default () => {}',
+      loader: 'js'
+    }))
+  }
 }
