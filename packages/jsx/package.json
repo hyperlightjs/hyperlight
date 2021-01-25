@@ -27,7 +27,7 @@
   },
   "author": "",
   "dependencies": {
-    "hyperapp": "^2.0.8"
+    "hyperapp": "^2.0.8=9"
   },
   "repository": {
     "type": "git",
