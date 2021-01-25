@@ -1,5 +1,7 @@
 import { jsx } from '@hyperlight/jsx'
 import { Context } from 'hyperlight'
+import fs from 'fs'
+import path from 'path'
 
 interface PageState {
   title: string
@@ -21,6 +23,7 @@ export default (state: PageState) => {
       <p className="text">Hello world</p>
       <p>{state.text}</p>
       <p>{state.slug}</p>
+      <p>{state.title}</p>
 
       <input
         value={state.text}
@@ -41,6 +44,7 @@ export function getInitialState() {
 export function getServerSideState(ctx: Context) {
   return {
     state: {
+      title: fs.readFileSync(path.join('pages', 'module.css'), 'utf-8'),
       slug: ctx.params.param
     }
   }

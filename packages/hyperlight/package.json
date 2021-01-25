@@ -50,6 +50,7 @@
     "@tinyhttp/app": "1.1.8",
     "@tinyhttp/etag": "^1.1.0",
     "as-table": "^1.0.55",
+    "builtin-modules": "^3.2.0",
     "cac": "^6.7.1",
     "chokidar": "github:paulmillr/chokidar",
     "colorette": "^1.2.1",

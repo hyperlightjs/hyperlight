@@ -61,8 +61,6 @@ export const serverSideHandler = (
     return
   }
 
-  console.log(renderToString(view, state))
-
   res.send(
     htmlTemplate(
       await jsTemplate(state, page.file),

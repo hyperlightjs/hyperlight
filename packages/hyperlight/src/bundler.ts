@@ -1,6 +1,7 @@
 import esbuild from 'esbuild'
 import path from 'path'
-import { writeFile, mkdir, rename, rm } from 'fs/promises'
+import builtin from 'builtin-modules'
+import { writeFile, mkdir } from 'fs/promises'
 import { existsSync as exists } from 'fs'
 import { convertFileExtension } from './utils/fileutils'
 
@@ -74,14 +75,20 @@ export async function clientBundling({ ...options }: BundlerOptions) {
   }
 }
 
+const builtinList = builtin.reduce((prev, val, index) =>
+  index > 0 ? `${prev}|${val}` : val
+)
+
+const builtinRegexp = new RegExp(`^(${builtinList})\\/?(.+)?`)
+
 const ignorePlugin = {
   name: 'ignoreplugin',
   setup(build) {
-    build.onResolve({ filter: /fs$/ }, (args) => ({
+    build.onResolve({ filter: builtinRegexp }, (args) => ({
       path: args.path,
       namespace: 'ignoreplugin'
     }))
-    build.onLoad({ filter: /.+/, namespace: 'ignoreplugin' }, () => ({
+    build.onLoad({ filter: builtinRegexp, namespace: 'ignoreplugin' }, () => ({
       contents: 'export default () => {}',
       loader: 'js'
     }))
