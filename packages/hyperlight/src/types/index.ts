@@ -21,9 +21,7 @@ export type ServerSideStateFunc<S> = (
   ctx: Context
 ) => ServerSideState<S> | Promise<ServerSideState<S>>
 
-export type InitialStateFunc<S> = () =>
-  | Promise<Partial<State<S>>>
-  | Partial<State<S>>
+export type InitialStateFunc<S> = () => Promise<Partial<State<S>>> | Partial<State<S>>
 
 export interface ServerSideRenderResult<S> {
   html: string

@@ -19,18 +19,13 @@ export async function getReadableFileSize(filename: string) {
   // convert to human readable format.
   const i = Math.floor(Math.log(size) / Math.log(1024))
 
-  return `${(size / Math.pow(1024, i)).toFixed(2)} ${
-    ['B', 'KB', 'MB', 'GB', 'TB'][i]
-  }`
+  return `${(size / Math.pow(1024, i)).toFixed(2)} ${['B', 'KB', 'MB', 'GB', 'TB'][i]}`
 }
 
-export async function normalizeRoute(route: string): Promise<string> {
+export function normalizeRoute(route: string): string {
   route = `/${route}`
 
-  route = route.replaceAll(
-    /\[(.+)\]/g,
-    (_: string, match: string) => `:${match}`
-  )
+  route = route.replaceAll(/\[(.+)\]/g, (_: string, match: string) => `:${match}`)
 
   route = route.replace(/([a-z\d]+)(\/*|)$/, (_: string, match: string) =>
     match == 'index' ? '' : match

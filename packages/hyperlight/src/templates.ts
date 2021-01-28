@@ -1,10 +1,8 @@
+import { State } from 'hyperapp'
 import { minify } from 'terser'
 
 export type JsTemplate = (state: any, pagePath: string) => Promise<string>
-export type DevTemplateConstructor = (
-  wsHost?: string,
-  wsPort?: number
-) => JsTemplate
+export type DevTemplateConstructor = (wsHost?: string, wsPort?: number) => JsTemplate
 
 export const prodJsTemplate: JsTemplate = async (state, pagePath) =>
   (
@@ -24,14 +22,11 @@ app({
 `)
   ).code
 
-export const devJsTemplate: DevTemplateConstructor = (wsHost, wsPort) => async (
-  state,
-  pagePath
-) => `
+export const devJsTemplate = async (state: State<any>, pagePath: string) => `
 import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
 import { livereload } from '/livereload.js'
-const { middleware, savedState } = livereload("${wsHost}", "${wsPort}")
+const { middleware, savedState } = livereload(location.hostname, "3003")
 const init = { ...savedState, ...${JSON.stringify(state)} }
 const appSettings = pageModule.appConfig?.(init)
 app({
@@ -43,12 +38,7 @@ app({
 })
 `
 
-export const htmlTemplate = (
-  js: string,
-  head: string,
-  preRender: string,
-  stylesheet: string
-) => `
+export const htmlTemplate = (js: string, head: string, preRender: string, stylesheet: string) => `
 <!DOCTYPE html>
 <html>
   <head>

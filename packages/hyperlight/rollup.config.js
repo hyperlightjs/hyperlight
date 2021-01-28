@@ -1,12 +1,7 @@
 import common from '../../rollup.config'
 import { dependencies } from './package.json'
 
-const external = Object.keys(dependencies).concat(
-  'util',
-  'path',
-  'fs/promises',
-  'fs'
-)
+const external = Object.keys(dependencies).concat('util', 'path', 'fs/promises', 'fs')
 
 export default [
   {

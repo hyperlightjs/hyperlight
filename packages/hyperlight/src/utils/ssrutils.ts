@@ -1,8 +1,8 @@
 import { PageExports, Request, Response } from '../types'
 import { join } from 'path'
-import { Handler } from '@tinyhttp/app'
 import { htmlTemplate, JsTemplate } from '../templates'
 import { renderToString } from 'hyperapp-render'
+import { noMatchHandler } from '../handlers/errorHandler'
 
 export interface ParsedBundle {
   import: PageExports
@@ -22,9 +22,7 @@ export async function parseBundle(
   bundlePath = join(process.cwd(), bundlePath)
 
   const page: PageExports = await import(
-    preventCaching
-      ? `${bundlePath}?r=${Math.floor(Math.random() * 10000)}`
-      : bundlePath
+    preventCaching ? `${bundlePath}?r=${Math.floor(Math.random() * 10000)}` : bundlePath
   )
 
   return {
@@ -35,8 +33,8 @@ export async function parseBundle(
 
 export const serverSideHandler = (
   page: HyperlightPage,
-  initialState: any,
-  notFound: Handler,
+  initialState: any | null,
+  styleSheet: string,
   jsTemplate: JsTemplate
 ) => async (req: Request, res: Response) => {
   const serverState = await page.module.import.getServerSideState?.({
@@ -45,14 +43,17 @@ export const serverSideHandler = (
     params: req.params
   })
 
-  const state = { ...initialState, ...serverState.state }
+  const state = {
+    ...(initialState ?? page.module.import.getInitialState?.()),
+    ...serverState?.state
+  }
 
   const head = page.module.import.Head
   const view = page.module.import.default
 
-  if (serverState.notFound) return await notFound(req, res)
+  if (serverState?.notFound) return await noMatchHandler(req, res)
 
-  if (serverState.redirect) {
+  if (serverState?.redirect) {
     const redirect = serverState.redirect
 
     redirect.statusCode ??= redirect.permanent ? 301 : 307
@@ -66,7 +67,7 @@ export const serverSideHandler = (
       await jsTemplate(state, page.file),
       renderToString(head?.(state)),
       renderToString(view(state)),
-      ''
+      styleSheet
     )
   )
 }

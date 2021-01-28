@@ -23,6 +23,29 @@ const common: esbuild.BuildOptions = {
   }
 }
 
+export async function build(
+  fullEntryPath: string,
+  relativeEntryPath: string
+): Promise<{ server: string; client: string }> {
+  const moduleJsPath = convertFileExtension(relativeEntryPath, '.mjs')
+  const server = path.join('.cache/server', moduleJsPath)
+  const client = path.join('.cache/client', moduleJsPath)
+
+  await serverBundling({
+    fullEntryPath,
+    relativeEntryPath,
+    outfile: server
+  })
+
+  await clientBundling({
+    fullEntryPath,
+    relativeEntryPath,
+    outfile: client
+  })
+
+  return { server, client }
+}
+
 export async function serverBundling({ ...options }: BundlerOptions) {
   let build: esbuild.BuildResult
   try {
@@ -54,9 +77,7 @@ export async function clientBundling({ ...options }: BundlerOptions) {
     await mkdir(path.parse(treeShake).dir, { recursive: true })
     await writeFile(
       treeShake,
-      `export { default, appConfig } from '${path.resolve(
-        options.fullEntryPath
-      )}'`
+      `export { default, appConfig } from '${path.resolve(options.fullEntryPath)}'`
     )
   }
 
@@ -75,9 +96,7 @@ export async function clientBundling({ ...options }: BundlerOptions) {
   }
 }
 
-const builtinList = builtin.reduce((prev, val, index) =>
-  index > 0 ? `${prev}|${val}` : val
-)
+const builtinList = builtin.reduce((prev, val, index) => (index > 0 ? `${prev}|${val}` : val))
 
 const builtinRegexp = new RegExp(`^(${builtinList})\\/?(.+)?`)
 

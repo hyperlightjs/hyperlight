@@ -2,9 +2,7 @@ export function livereload(wsHost: string, wsPort: string) {
   const websocket = new WebSocket(`ws://${wsHost}:${wsPort}`)
 
   const localstorageState = localStorage.getItem('reloadState')
-  const savedState = localstorageState
-    ? JSON.parse(localstorageState)
-    : undefined
+  const savedState = localstorageState ? JSON.parse(localstorageState) : undefined
 
   localStorage.removeItem('reloadState')
 
@@ -24,9 +22,7 @@ export function livereload(wsHost: string, wsPort: string) {
       currentState = state
     }
 
-    return middleware
-      ? middleware(dispatch)(state, ...args)
-      : dispatch(state, ...args)
+    return middleware ? middleware(dispatch)(state, ...args) : dispatch(state, ...args)
   }
 
   return { middleware, savedState }

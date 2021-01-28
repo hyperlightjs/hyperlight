@@ -59,10 +59,7 @@ declare module 'hyperapp' {
   type ActionDescriptor<S, P> = [Action<S, P>, Payload<P>]
 
   // A transform carries out the transition from one state to another.
-  type Transform<S, P = any> = (
-    state: StateFormat<S>,
-    props?: Payload<P>
-  ) => StateFormat<S>
+  type Transform<S, P = any> = (state: StateFormat<S>, props?: Payload<P>) => StateFormat<S>
 
   // State can either be on its own or associated with effects.
   type StateFormat<S> = State<S> | StateWithEffects<S>
@@ -132,12 +129,7 @@ declare module 'hyperapp' {
   >
 
   // The `class` property represents an HTML class attribute string.
-  type ClassProp =
-    | false
-    | string
-    | undefined
-    | Record<string, boolean | undefined>
-    | ClassProp[]
+  type ClassProp = false | string | undefined | Record<string, boolean | undefined> | ClassProp[]
 
   // The `style` property represents inline CSS.
   type StyleProp = {

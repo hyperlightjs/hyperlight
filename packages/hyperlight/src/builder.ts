@@ -1,11 +1,6 @@
 import readdir from 'readdirp'
-import path from 'path'
-import { clientBundling, serverBundling } from './bundler'
-import {
-  clearCache,
-  convertFileExtension,
-  getReadableFileSize
-} from './utils/fileutils'
+import { build } from './bundler'
+import { clearCache, getReadableFileSize } from './utils/fileutils'
 import { parseBundle } from './utils/ssrutils'
 import table from 'as-table'
 
@@ -26,21 +21,7 @@ export class HyperlightBuilder {
     const buildTable = []
 
     for (const page of pages) {
-      const moduleJsPath = convertFileExtension(page.path, '.mjs')
-      const serverResult = path.join('.cache/server', moduleJsPath)
-      const clientResult = path.join('.cache/client', moduleJsPath)
-
-      await serverBundling({
-        fullEntryPath: page.fullPath,
-        relativeEntryPath: page.path,
-        outfile: serverResult
-      })
-
-      await clientBundling({
-        fullEntryPath: page.fullPath,
-        relativeEntryPath: page.path,
-        outfile: clientResult
-      })
+      const { client: clientResult, server: serverResult } = await build(page.fullPath, page.path)
 
       const parsedImport = await parseBundle(serverResult, false)
       const Size = await getReadableFileSize(clientResult)
