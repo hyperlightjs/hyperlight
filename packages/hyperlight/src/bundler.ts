@@ -1,4 +1,4 @@
-import esbuild from 'esbuild'
+import esbuild, { Plugin } from 'esbuild'
 import path from 'path'
 import builtin from 'builtin-modules'
 import { writeFile, mkdir } from 'fs/promises'
@@ -86,7 +86,7 @@ export async function clientBundling({ ...options }: BundlerOptions) {
     build = await esbuild.build({
       ...common,
       entryPoints: [treeShake],
-      plugins: [ignorePlugin],
+      plugins: [blankImportPlugin],
       platform: 'node',
       outbase: options.base,
       outfile: options.outfile
@@ -100,16 +100,33 @@ const builtinList = builtin.reduce((prev, val, index) => (index > 0 ? `${prev}|$
 
 const builtinRegexp = new RegExp(`^(${builtinList})\\/?(.+)?`)
 
-const ignorePlugin = {
-  name: 'ignoreplugin',
+const blankImportPlugin: Plugin = {
+  name: 'blankimport',
   setup(build) {
     build.onResolve({ filter: builtinRegexp }, (args) => ({
       path: args.path,
-      namespace: 'ignoreplugin'
+      namespace: 'blankimport'
     }))
-    build.onLoad({ filter: builtinRegexp, namespace: 'ignoreplugin' }, () => ({
-      contents: 'export default () => {}',
-      loader: 'js'
-    }))
+    build.onLoad({ filter: builtinRegexp, namespace: 'blankimport' }, async (args) => {
+      const contents = JSON.stringify(
+        /**
+         * Operation steps:
+         * - Import the module server side so you're 100% sure it will resolve
+         * NOTE: A module won't get completely imported twice unless its import url changes, so the import is cached.
+         * - get the keys of the import. This will get the name of every named export present in the built-in
+         * - Reduce the string array into an object with the initializer {}, each string is added as the key of the object with an empty string
+         *   so named imports will work but will just import a blank object.
+         * - Finally stringify the object and let esbuild handle the rest for you
+         */
+        Object.keys(await import(args.path)).reduce<Record<string, string>>(
+          (p, c) => ({ ...p, [c]: '' }),
+          {}
+        )
+      )
+      return {
+        contents,
+        loader: 'json'
+      }
+    })
   }
 }

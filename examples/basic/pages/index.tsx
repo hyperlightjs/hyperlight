@@ -1,6 +1,5 @@
 import { jsx } from '@hyperlight/jsx'
 import { InitialStateFunc } from 'hyperlight'
-import fs from 'fs'
 import path from 'path'
 
 import './module.css'
@@ -36,7 +35,7 @@ export default (state: PageState) => {
 
 export const getInitialState: InitialStateFunc<PageState> = () => {
   return {
-    text: "Edit me!",
+    text: 'Edit me!',
     title: 'Welcome to hyperlight!'
   }
 }
