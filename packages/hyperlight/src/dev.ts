@@ -64,7 +64,6 @@ class DevRouter {
       path: page.route
     }
 
-    console.log(this.middlewareList)
     this.updateTHRouter()
   }
 

@@ -11,6 +11,6 @@
   "author": "Pietro T. <kapakapa197@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "hyperapp": "2.0.8"
+    "hyperapp": "2.0.12"
   }
 }

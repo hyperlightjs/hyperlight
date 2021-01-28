@@ -11,7 +11,7 @@ import { Server as StaticServer } from 'node-static'
 import sirv from 'sirv'
 
 import { noMatchHandler } from './handlers/errorHandler'
-import { serveHyperapp as serveHyperappBin } from './handlers/staticHandler'
+import { serveHyperapp as serveHyperappBin } from './handlers/hyperappServer'
 import { devRouteWatch } from './dev'
 
 interface HyperlightServerSettings {
