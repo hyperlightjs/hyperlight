@@ -1,6 +1,6 @@
 {
   "name": "@hyperlight/hyperapp-types",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Implements hyperapp types for hyperlight",
   "types": "./hyperapp.d.ts",
