@@ -1,6 +1,6 @@
 {
   "name": "hyperlight",
-  "version": "0.0.25-next",
+  "version": "0.0.25",
   "description": "The Hyperapp Framework.",
   "type": "module",
   "main": "dist/index.js",
