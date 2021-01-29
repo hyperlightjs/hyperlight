@@ -5,6 +5,13 @@
 ### Patch Changes
 
 - Updated dependencies [undefined]
+  - hyperlight@0.0.28
+
+## null
+
+### Patch Changes
+
+- Updated dependencies [undefined]
   - hyperlight@0.0.27
 
 ## null
