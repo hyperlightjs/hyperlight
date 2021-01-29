@@ -39,6 +39,7 @@ export async function devRouteWatch(
       if (!filter(filename)) return
       devRouter.removeRoute(filename)
     })
+  // .on('all', console.log)
 }
 
 class DevRouter {
@@ -53,7 +54,7 @@ class DevRouter {
   }
 
   private updateTHRouter() {
-    this.app.middleware = Object.values(this.middlewareList)
+    this.app.middleware = Object.values(this.middlewareList).filter((v) => v !== undefined)
   }
 
   addRoute(filename: string, page: HyperlightPage) {
@@ -69,5 +70,7 @@ class DevRouter {
 
   removeRoute(filename: string) {
     this.middlewareList[filename] = undefined
+
+    this.updateTHRouter()
   }
 }

@@ -63,6 +63,8 @@ export async function serverBundling({ ...options }: BundlerOptions) {
   }
 
   for (const warning of build.warnings) console.error(warning)
+
+  return build
 }
 
 export async function clientBundling({ ...options }: BundlerOptions) {
@@ -94,6 +96,8 @@ export async function clientBundling({ ...options }: BundlerOptions) {
   } catch (e) {
     console.error(e)
   }
+
+  return build
 }
 
 const builtinList = builtin.reduce((prev, val, index) => (index > 0 ? `${prev}|${val}` : val))

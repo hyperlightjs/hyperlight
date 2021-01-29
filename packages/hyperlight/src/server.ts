@@ -6,13 +6,10 @@ import { convertFileExtension, normalizeRoute } from './utils/fileutils'
 import { info } from './utils/logging'
 import { HyperlightPage, parseBundle, serverSideHandler } from './utils/ssrutils'
 import { renderToString } from 'hyperapp-render'
-
-import { Server as StaticServer } from 'node-static'
-import sirv from 'sirv'
-
 import { noMatchHandler } from './handlers/errorHandler'
-import { serveHyperapp as serveHyperappBin } from './handlers/hyperappServer'
+import { serveHyperapp as serveHyperappBin } from './handlers/hyperappHandler'
 import { devRouteWatch } from './dev'
+import { serveStaticFolder } from './handlers/staticHandler'
 
 interface HyperlightServerSettings {
   host: string
@@ -27,8 +24,6 @@ export class HyperlightServer {
     this.settings = settings
 
     this.app = new App({ noMatchHandler: noMatchHandler })
-
-    serveHyperappBin(this.app)
   }
 
   async productionServer() {
@@ -39,7 +34,7 @@ export class HyperlightServer {
 
     const pages = await Promise.all(
       modulesDir.map(async (entry) => ({
-        route: await normalizeRoute(convertFileExtension(entry.path, '')),
+        route: normalizeRoute(convertFileExtension(entry.path, '')),
         file: path.join('/bundled/', entry.path),
         module: await parseBundle(path.join('.cache/server', entry.path), false)
       }))
@@ -49,27 +44,18 @@ export class HyperlightServer {
       this.app.get(page.route, await this.pageHandler(page))
     }
 
-    this.app.use('/bundled/', sirv('.cache/client', { etag: true }))
-    this.app.use('/', sirv('public/', { etag: true }))
+    await serveHyperappBin(this.app)
+    this.app.use('/bundled/', serveStaticFolder('.cache/client', true)) // true = cache, false = no cache
+    this.app.use('/', serveStaticFolder('public/', true))
 
     this.listen()
   }
 
   async devServer() {
     // Static routes for public/ and bundled code
-    const publicDir = new StaticServer('public/')
-    const bundleDir = new StaticServer('.cache/client/')
-
-    this.app.use('/bundled/', (req, res, next) =>
-      bundleDir.serve(req, res, (err) => {
-        err ? next() : ''
-      })
-    )
-    this.app.use('/', (req, res, next) =>
-      publicDir.serve(req, res, (err) => {
-        err ? next() : ''
-      })
-    )
+    await serveHyperappBin(this.app)
+    this.app.use('/bundled/', serveStaticFolder('.cache/client', false))
+    this.app.use('/', serveStaticFolder('public/', false))
 
     // Live reload code serve
     const liveReloadCode = `export ${(
@@ -79,17 +65,10 @@ export class HyperlightServer {
       res.type('text/javascript').send(liveReloadCode)
     })
 
+    // dev server with auto reload
     await devRouteWatch(this.app)
 
     this.listen()
-  }
-
-  listen() {
-    this.app.listen(
-      this.settings.port,
-      () => info(`Server is now listening on ${this.settings.host}:${this.settings.port}`),
-      this.settings.host
-    )
   }
 
   pageHandler = async (page: HyperlightPage) => {
@@ -112,5 +91,13 @@ export class HyperlightServer {
     return staticHtml
       ? (_, res: Response) => res.send(staticHtml)
       : serverSideHandler(page, initialState, styleSheet, prodJsTemplate)
+  }
+
+  listen() {
+    this.app.listen(
+      this.settings.port,
+      () => info(`Server is now listening on ${this.settings.host}:${this.settings.port}`),
+      this.settings.host
+    )
   }
 }
