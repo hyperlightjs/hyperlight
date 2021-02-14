@@ -16,7 +16,7 @@ app({
   init,
   view: pageModule.default,
   node: document.getElementById('app'),
-  middleware: appSettings?.middleware,
+  dispatch: appSettings?.middleware,
   subscriptions: appSettings?.subscriptions
 })
 `)
@@ -25,15 +25,18 @@ app({
 export const devJsTemplate = async (state: State<any>, pagePath: string) => `
 import { app } from '/hyperapp.js'
 import * as pageModule from '${pagePath}'
+
 import { livereload } from '/livereload.js'
-const { middleware, savedState } = livereload(location.hostname, "3003")
+const { middlewareConstructor: middleware, savedState } = livereload(location.hostname, "3003")
+
 const init = { ...savedState, ...${JSON.stringify(state)} }
 const appSettings = pageModule.appConfig?.(init)
+
 app({
   init,
   view: pageModule.default,
   node: document.getElementById('app'),
-  middleware: middleware(appSettings?.middleware),
+  dispatch: middleware(appSettings?.middleware),
   subscriptions: appSettings?.subscriptions
 })
 `

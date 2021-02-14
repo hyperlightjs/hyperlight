@@ -45,7 +45,7 @@ export class HyperlightServer {
     }
 
     await serveHyperappBin(this.app)
-    this.app.use('/bundled/', serveStaticFolder('.cache/client', true)) // true = cache, false = no cache
+    this.app.use('/bundled/', serveStaticFolder('.cache/client', true))
     this.app.use('/', serveStaticFolder('public/', true))
 
     this.listen()
@@ -87,6 +87,8 @@ export class HyperlightServer {
         styleSheet
       )
     }
+
+    console.log(staticHtml)
 
     return staticHtml
       ? (_, res: Response) => res.send(staticHtml)

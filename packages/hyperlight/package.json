@@ -55,10 +55,10 @@
     "chokidar": "github:paulmillr/chokidar",
     "colorette": "^1.2.1",
     "dependency-tree": "^8.0.0",
-    "esbuild": "^0.8.36",
+    "esbuild": "^0.8.44",
     "hyperapp-render": "^4.0.0",
     "readdirp": "^3.5.0",
-    "sirv": "^1.0.10",
+    "sirv": "^1.0.11",
     "terser": "^5.5.1",
     "ws": "^7.4.2"
   },

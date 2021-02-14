@@ -21,9 +21,11 @@ export async function parseBundle(
 ): Promise<ParsedBundle> {
   bundlePath = join(process.cwd(), bundlePath)
 
-  const page: PageExports = await import(
-    preventCaching ? `${bundlePath}?r=${Math.floor(Math.random() * 10000)}` : bundlePath
-  )
+  const importLocation = preventCaching
+    ? `${bundlePath}?r=${Math.floor(Math.random() * 10000)}`
+    : bundlePath
+
+  const page: PageExports = await import(importLocation)
 
   return {
     type: typeof page.getServerSideState == 'function' ? 'SSR' : 'SSG',

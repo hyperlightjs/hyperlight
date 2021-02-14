@@ -16,7 +16,7 @@
   "dependencies": {
     "@hyperlight/jsx": "workspace:*",
     "hyperapp": "^2.0.12",
-    "hyperlight": "workspace:*"
+    "hyperlight": "workspace:^0.0.28"
   },
   "devDependencies": {
     "@tinyhttp/app": "^1.1.5"

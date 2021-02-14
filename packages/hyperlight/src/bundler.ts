@@ -4,12 +4,15 @@ import builtin from 'builtin-modules'
 import { writeFile, mkdir } from 'fs/promises'
 import { existsSync as exists } from 'fs'
 import { convertFileExtension } from './utils/fileutils'
+import event from 'events'
+import { error, info, warning } from './utils/logging'
 
 interface BundlerOptions {
   fullEntryPath: string
   relativeEntryPath: string
   base?: string
   outfile: string
+  watch?: esbuild.WatchMode
 }
 
 const common: esbuild.BuildOptions = {
@@ -25,25 +28,41 @@ const common: esbuild.BuildOptions = {
 
 export async function build(
   fullEntryPath: string,
-  relativeEntryPath: string
-): Promise<{ server: string; client: string }> {
+  relativeEntryPath: string,
+  watch?: boolean
+): Promise<{ server: string; client: string; stopWatcher?: () => void; eventEmitter: event }> {
   const moduleJsPath = convertFileExtension(relativeEntryPath, '.mjs')
   const server = path.join('.cache/server', moduleJsPath)
   const client = path.join('.cache/client', moduleJsPath)
 
-  await serverBundling({
+  const bundleClient = async () =>
+    await clientBundling({
+      fullEntryPath,
+      relativeEntryPath,
+      outfile: client
+    })
+
+  const emitter = new event.EventEmitter()
+
+  const buildResult = await serverBundling({
     fullEntryPath,
     relativeEntryPath,
-    outfile: server
+    outfile: server,
+    watch: watch
+      ? {
+          onRebuild: async (buildError) => {
+            info(`Building "${relativeEntryPath}"...`)
+            if (!buildError) await bundleClient()
+
+            emitter.emit('build', relativeEntryPath)
+          }
+        }
+      : undefined
   })
 
-  await clientBundling({
-    fullEntryPath,
-    relativeEntryPath,
-    outfile: client
-  })
+  await bundleClient()
 
-  return { server, client }
+  return { server, client, stopWatcher: buildResult.stop, eventEmitter: emitter }
 }
 
 export async function serverBundling({ ...options }: BundlerOptions) {
@@ -56,13 +75,14 @@ export async function serverBundling({ ...options }: BundlerOptions) {
       platform: 'node',
       entryPoints: [options.fullEntryPath],
       outbase: options.base,
-      outfile: options.outfile
+      outfile: options.outfile,
+      watch: options.watch
     })
   } catch (e) {
-    console.error(e)
+    error(e)
   }
 
-  for (const warning of build.warnings) console.error(warning)
+  for (const warningmessage of build.warnings) warning(warningmessage.text)
 
   return build
 }
@@ -91,10 +111,11 @@ export async function clientBundling({ ...options }: BundlerOptions) {
       plugins: [blankImportPlugin],
       platform: 'node',
       outbase: options.base,
-      outfile: options.outfile
+      outfile: options.outfile,
+      watch: options.watch
     })
   } catch (e) {
-    console.error(e)
+    error(e)
   }
 
   return build
