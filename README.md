@@ -14,12 +14,20 @@ Next-gen **[Hyperapp](https://github.com/jorgebucaran/hyperapp)** framework.
 - **Modern**. ESM everywhere, including server code. Targeting ES2019 for minimal output.
 - **Developer friendly**. Dev server with persisting state, [JSX support](packages/jsx) and types out of the box.
 
+## Project status
+
+Currently it's in the works and a lot of features aren't supported yet.
+
 ## Quick start
 
+wip
+
 ```sh
-pnpx create-hyperlight-app
+pnpx create-hyperlight-app (doesn't exist yet)
 ```
 
 ## Docs
+
+wip
 
 Visit [wip] to get started with Hyperlight.
