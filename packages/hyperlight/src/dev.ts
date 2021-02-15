@@ -31,7 +31,8 @@ export async function devRouteWatch(
       const { server: serverBundle, stopWatcher, eventEmitter } = await build(
         fullPath,
         filename,
-        true
+        true,
+        false
       )
 
       eventEmitter.on('build', async (filename: string) => {

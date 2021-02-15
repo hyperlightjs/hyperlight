@@ -13,6 +13,7 @@ interface BundlerOptions {
   base?: string
   outfile: string
   watch?: esbuild.WatchMode
+  minify?: boolean
 }
 
 const common: esbuild.BuildOptions = {
@@ -29,7 +30,8 @@ const common: esbuild.BuildOptions = {
 export async function build(
   fullEntryPath: string,
   relativeEntryPath: string,
-  watch?: boolean
+  watch?: boolean,
+  minify?: boolean
 ): Promise<{ server: string; client: string; stopWatcher?: () => void; eventEmitter: event }> {
   const moduleJsPath = convertFileExtension(relativeEntryPath, '.mjs')
   const server = path.join('.cache/server', moduleJsPath)
@@ -39,7 +41,8 @@ export async function build(
     await clientBundling({
       fullEntryPath,
       relativeEntryPath,
-      outfile: client
+      outfile: client,
+      minify
     })
 
   const emitter = new event.EventEmitter()
@@ -48,6 +51,7 @@ export async function build(
     fullEntryPath,
     relativeEntryPath,
     outfile: server,
+    minify,
     watch: watch
       ? {
           onRebuild: async (buildError) => {
@@ -76,7 +80,8 @@ export async function serverBundling({ ...options }: BundlerOptions) {
       entryPoints: [options.fullEntryPath],
       outbase: options.base,
       outfile: options.outfile,
-      watch: options.watch
+      watch: options.watch,
+      minify: typeof options.minify === 'undefined' ? true : options.minify
     })
   } catch (e) {
     error(e)
@@ -112,7 +117,8 @@ export async function clientBundling({ ...options }: BundlerOptions) {
       platform: 'node',
       outbase: options.base,
       outfile: options.outfile,
-      watch: options.watch
+      watch: options.watch,
+      minify: typeof options.minify === 'undefined' ? true : options.minify
     })
   } catch (e) {
     error(e)
