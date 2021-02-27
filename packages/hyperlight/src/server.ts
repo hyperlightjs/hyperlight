@@ -6,7 +6,7 @@ import { convertFileExtension, normalizeRoute } from './utils/fileutils'
 import { info } from './utils/logging'
 import { HyperlightPage, parseBundle, serverSideHandler } from './utils/ssrutils'
 import { renderToString } from 'hyperapp-render'
-import { noMatchHandler } from './handlers/errorHandler'
+import { noMatchHandler, onError } from './handlers/errorHandler'
 import { serveHyperapp as serveHyperappBin } from './handlers/hyperappHandler'
 import { devRouteWatch } from './dev'
 import { serveStaticFolder } from './handlers/staticHandler'
@@ -23,7 +23,7 @@ export class HyperlightServer {
   constructor(settings: HyperlightServerSettings) {
     this.settings = settings
 
-    this.app = new App({ noMatchHandler: noMatchHandler })
+    this.app = new App({ noMatchHandler: noMatchHandler, onError })
   }
 
   async productionServer() {

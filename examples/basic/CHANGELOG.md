@@ -1,5 +1,12 @@
 # basic
 
+## 0.0.1
+
+### Patch Changes
+
+- Updated dependencies [undefined]
+  - hyperlight@0.0.31
+
 ## null
 
 ### Patch Changes

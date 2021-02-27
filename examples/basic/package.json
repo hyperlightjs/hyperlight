@@ -5,7 +5,8 @@
   "scripts": {
     "build": "hl build",
     "serve": "hl serve",
-    "start": "hl build && hl serve"
+    "start": "hl build && hl serve",
+    "dev": "hl dev"
   },
   "keywords": [],
   "author": "",
@@ -16,10 +17,10 @@
   "dependencies": {
     "@hyperlight/jsx": "workspace:*",
     "hyperapp": "^2.0.12",
-    "hyperlight": "workspace:^0.0.30"
+    "hyperlight": "workspace:^0.0.31"
   },
   "devDependencies": {
     "@tinyhttp/app": "^1.1.5"
   },
-  "version": null
+  "version": "0.0.1"
 }
