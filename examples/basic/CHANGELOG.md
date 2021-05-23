@@ -1,5 +1,13 @@
 # basic
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [undefined]
+  - hyperlight@0.0.32
+  - @hyperlight/jsx@0.0.19
+
 ## 0.0.1
 
 ### Patch Changes
