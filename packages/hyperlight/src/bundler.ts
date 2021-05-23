@@ -74,7 +74,7 @@ export async function serverBundling({ ...options }: BundlerOptions) {
   try {
     build = await esbuild.build({
       ...common,
-      banner: `const require=(await import('module')).createRequire(import.meta.url);`,
+      banner: { js: `const require=(await import('module')).createRequire(import.meta.url);` },
       target: 'node12.4.0',
       platform: 'node',
       entryPoints: [options.fullEntryPath],
