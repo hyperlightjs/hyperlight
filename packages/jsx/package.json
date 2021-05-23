@@ -16,8 +16,11 @@
     "build": "rollup -c ../../rollup.config.js"
   },
   "author": "",
-  "dependencies": {
-    "hyperapp": "^2.0.12"
+  "devDependencies": {
+    "hyperapp": "^2.0.18"
+  },
+  "peerDependencies": {
+    "hyperapp": ">=2"
   },
   "repository": {
     "type": "git",
