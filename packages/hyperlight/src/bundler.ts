@@ -6,6 +6,7 @@ import { existsSync as exists } from 'fs'
 import { convertFileExtension } from './utils/fileutils'
 import event from 'events'
 import { error, info, warning } from './utils/logging'
+import { modEsbuildConf } from './clientConfig'
 
 interface BundlerOptions {
   fullEntryPath: string
@@ -72,17 +73,19 @@ export async function build(
 export async function serverBundling({ ...options }: BundlerOptions) {
   let build: esbuild.BuildResult
   try {
-    build = await esbuild.build({
-      ...common,
-      banner: { js: `const require=(await import('module')).createRequire(import.meta.url);` },
-      target: 'node12.4.0',
-      platform: 'node',
-      entryPoints: [options.fullEntryPath],
-      outbase: options.base,
-      outfile: options.outfile,
-      watch: options.watch,
-      minify: typeof options.minify === 'undefined' ? true : options.minify
-    })
+    build = await esbuild.build(
+      await modEsbuildConf({
+        ...common,
+        banner: { js: `const require=(await import('module')).createRequire(import.meta.url);` },
+        target: 'node12.4.0',
+        platform: 'node',
+        entryPoints: [options.fullEntryPath],
+        outbase: options.base,
+        outfile: options.outfile,
+        watch: options.watch,
+        minify: typeof options.minify === 'undefined' ? true : options.minify
+      })
+    )
   } catch (e) {
     error(e)
   }
@@ -110,16 +113,18 @@ export async function clientBundling({ ...options }: BundlerOptions) {
 
   let build: esbuild.BuildResult
   try {
-    build = await esbuild.build({
-      ...common,
-      entryPoints: [treeShake],
-      plugins: [blankImportPlugin],
-      platform: 'node',
-      outbase: options.base,
-      outfile: options.outfile,
-      watch: options.watch,
-      minify: typeof options.minify === 'undefined' ? true : options.minify
-    })
+    build = await esbuild.build(
+      await modEsbuildConf({
+        ...common,
+        entryPoints: [treeShake],
+        plugins: [blankImportPlugin],
+        platform: 'node',
+        outbase: options.base,
+        outfile: options.outfile,
+        watch: options.watch,
+        minify: typeof options.minify === 'undefined' ? true : options.minify
+      })
+    )
   } catch (e) {
     error(e)
   }

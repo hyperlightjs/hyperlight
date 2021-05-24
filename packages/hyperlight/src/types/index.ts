@@ -1,5 +1,10 @@
 import type { Request, Response } from '@tinyhttp/app'
 import { Middleware, State, Subscription, VDOM } from 'hyperapp'
+import esbuild from 'esbuild'
+
+export interface HyperlightConfiguration {
+  esbuild: (config: esbuild.BuildOptions) => esbuild.BuildOptions
+}
 
 export interface Context {
   req: Request

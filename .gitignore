@@ -9,3 +9,4 @@ pnpm-lock.yaml
 .next
 .cache
 .clinic
+.pnpm-debug.log

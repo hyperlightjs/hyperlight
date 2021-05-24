@@ -88,8 +88,6 @@ export class HyperlightServer {
       )
     }
 
-    console.log(staticHtml)
-
     return staticHtml
       ? (_, res: Response) => res.send(staticHtml)
       : serverSideHandler(page, initialState, styleSheet, prodJsTemplate)
